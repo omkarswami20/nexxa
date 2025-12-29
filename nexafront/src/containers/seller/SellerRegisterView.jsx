@@ -10,7 +10,8 @@ const SellerRegisterView = ({
     isLoading,
     isSuccess,
     isError,
-    error
+    error,
+    fieldErrors = {},
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -71,6 +72,7 @@ const SellerRegisterView = ({
                         variant="outlined"
                     />
                     <TextField
+                    
                         fullWidth
                         label="Mobile Number"
                         name="mobile"
@@ -79,6 +81,8 @@ const SellerRegisterView = ({
                         margin="normal"
                         required
                         variant="outlined"
+                        error={Boolean(fieldErrors.mobile)}
+                        helperText={fieldErrors.mobile}
                     />
                     <TextField
                         fullWidth

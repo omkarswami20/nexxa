@@ -13,6 +13,7 @@ const SellerRegisterContainer = () => {
         storeName: '',
     });
     const [showOtpModal, setShowOtpModal] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const [registerSeller, { isLoading, isSuccess, isError, error }] = useRegisterSellerMutation();
     const [verifySellerOtp, { isLoading: isVerifying, error: verifyError }] = useVerifySellerOtpMutation();
@@ -21,6 +22,10 @@ const SellerRegisterContainer = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Clear field-level error when user edits the field
+        if (fieldErrors[e.target.name]) {
+            setFieldErrors({ ...fieldErrors, [e.target.name]: undefined });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -28,7 +33,13 @@ const SellerRegisterContainer = () => {
         try {
             await registerSeller(formData).unwrap();
             setShowOtpModal(true);
+            setFieldErrors({});
         } catch (err) {
+            // If backend indicates mobile already exists, show field-level error
+            const msg = err?.data?.message || err?.error || String(err);
+            if (/mobile/i.test(msg) || /already.*registered/i.test(msg)) {
+                setFieldErrors({ mobile: msg });
+            }
             console.error('Failed to register:', err);
         }
     };
@@ -62,6 +73,7 @@ const SellerRegisterContainer = () => {
                 isSuccess={isSuccess}
                 isError={isError}
                 error={error}
+                fieldErrors={fieldErrors}
             />
             {/* {showOtpModal && (
                 <OtpModal

@@ -13,6 +13,7 @@ const CustomerRegisterContainer = () => {
         password: '',
     });
     const [showOtpModal, setShowOtpModal] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({});
 
     // Mutations for registration and verification
     const [registerCustomer, { isLoading, isSuccess, isError, error }] = useRegisterCustomerMutation();
@@ -23,6 +24,9 @@ const CustomerRegisterContainer = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (fieldErrors[e.target.name]) {
+            setFieldErrors({ ...fieldErrors, [e.target.name]: undefined });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -31,7 +35,12 @@ const CustomerRegisterContainer = () => {
             await registerCustomer(formData).unwrap();
             // Show OTP modal instead of navigating immediately
             setShowOtpModal(true);
+            setFieldErrors({});
         } catch (err) {
+            const msg = err?.data?.message || err?.error || String(err);
+            if (/mobile/i.test(msg) || /already.*registered/i.test(msg)) {
+                setFieldErrors({ mobile: msg });
+            }
             console.error('Failed to register:', err);
         }
     };
@@ -69,6 +78,7 @@ const CustomerRegisterContainer = () => {
                 isSuccess={isSuccess}
                 isError={isError}
                 error={error}
+                fieldErrors={fieldErrors}
             />
             {showOtpModal && (
                 <OtpModal

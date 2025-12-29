@@ -11,6 +11,7 @@ const CustomerRegisterView = ({
     isSuccess,
     isError,
     error,
+    fieldErrors = {},
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -77,7 +78,9 @@ const CustomerRegisterView = ({
                         value={formData.mobile}
                         onChange={onChange}
                         margin="normal"
-                        variant="outlined"
+                                        variant="outlined"
+                                        error={Boolean(fieldErrors.mobile)}
+                                        helperText={fieldErrors.mobile}
                     />
                     <TextField
                         fullWidth
