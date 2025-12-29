@@ -35,10 +35,27 @@ const SellerRegisterContainer = () => {
             setShowOtpModal(true);
             setFieldErrors({});
         } catch (err) {
-            // If backend indicates mobile already exists, show field-level error
-            const msg = err?.data?.message || err?.error || String(err);
-            if (/mobile/i.test(msg) || /already.*registered/i.test(msg)) {
-                setFieldErrors({ mobile: msg });
+            // Extract mobile-specific message from various possible API error shapes
+            const data = err?.data || {};
+            let mobileMsg;
+            if (data?.errors && data.errors.mobile) {
+                // errors: { mobile: '...' }
+                mobileMsg = data.errors.mobile;
+            } else if (Array.isArray(data?.errors) && data.errors.length) {
+                // errors: [{ field: 'mobile', message: '...' }, ...]
+                const mobileErrorObj = data.errors.find((x) => x.field === 'mobile' || /mobile/i.test(x?.field || '') || /mobile/i.test(x?.message || ''));
+                if (mobileErrorObj) mobileMsg = mobileErrorObj.message || String(mobileErrorObj);
+            } else if (data?.message && /mobile/i.test(data.message)) {
+                mobileMsg = data.message;
+            } else if (err?.error && /mobile/i.test(err.error)) {
+                mobileMsg = err.error;
+            } else {
+                // fallback: raw message
+                mobileMsg = undefined;
+            }
+
+            if (mobileMsg) {
+                setFieldErrors({ mobile: mobileMsg });
             }
             console.error('Failed to register:', err);
         }
