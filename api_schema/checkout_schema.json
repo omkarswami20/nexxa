@@ -1,0 +1,81 @@
+{
+    "controller": "CheckoutController",
+    "basePath": "/api/checkout",
+    "endpoints": [
+        {
+            "method": "POST",
+            "path": "",
+            "summary": "Checkout and Place Order",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "addressId": {
+                                    "type": "integer",
+                                    "example": 1,
+                                    "description": "Optional existing address ID"
+                                },
+                                "address": {
+                                    "type": "object",
+                                    "description": "Inline address if addressId is not provided",
+                                    "properties": {
+                                        "line1": {
+                                            "type": "string",
+                                            "example": "123 Main St"
+                                        },
+                                        "city": {
+                                            "type": "string",
+                                            "example": "New York"
+                                        },
+                                        "state": {
+                                            "type": "string",
+                                            "example": "NY"
+                                        },
+                                        "zip": {
+                                            "type": "string",
+                                            "example": "10001"
+                                        },
+                                        "country": {
+                                            "type": "string",
+                                            "example": "USA"
+                                        },
+                                        "phone": {
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "John Doe"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Order placed successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": 101,
+                                "totalAmount": 59.98,
+                                "status": "PLACED"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

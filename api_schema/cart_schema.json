@@ -1,0 +1,113 @@
+{
+    "controller": "CartController",
+    "basePath": "/api/cart",
+    "endpoints": [
+        {
+            "method": "GET",
+            "path": "",
+            "summary": "Get Cart Items",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Cart with products",
+                    "content": {
+                        "application/json": {
+                            "example": [
+                                {
+                                    "id": 1,
+                                    "productId": 5,
+                                    "quantity": 2,
+                                    "product": {
+                                        "id": 5,
+                                        "name": "T-Shirt",
+                                        "price": 29.99,
+                                        "stockQuantity": 100
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "PUT",
+            "path": "/items",
+            "summary": "Set Item Quantity",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "productId": {
+                                    "type": "integer",
+                                    "example": 5
+                                },
+                                "quantity": {
+                                    "type": "integer",
+                                    "example": 3
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Updated cart item",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": 1,
+                                "quantity": 3
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "DELETE",
+            "path": "/items/{productId}",
+            "summary": "Remove Item from Cart",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "productId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Removed item",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "Removed"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

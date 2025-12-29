@@ -1,0 +1,107 @@
+package com.nexashop.backend.service;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Random;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class OtpService {
+
+    public enum OtpType { SELLER, USER }
+
+    private final StringRedisTemplate redisTemplate;
+    private final EmailService emailService;
+    private final Random random = new Random();
+
+    public OtpService(StringRedisTemplate redisTemplate, EmailService emailService) {
+        this.redisTemplate = redisTemplate;
+        this.emailService = emailService;
+    }
+
+    private void sendSms(String mobile, String otp) {
+        // DEBUG LOGGING
+        System.out.println("--------------------------------------------------");
+        System.out.println("MOBILE OTP FOR " + mobile + ": " + otp);
+        System.out.println("--------------------------------------------------");
+
+        try {
+            // TODO: Add auth_key or correct params when available
+            String url = "https://ciacloud.in/otpapi.php?number=" + mobile + "&otp=" + otp;
+            new RestTemplate().getForObject(url, String.class);
+            System.out.println("SMS Sent to " + mobile);
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            System.out.println("SMS Skipped: API Key required (401 Unauthorized)");
+        } catch (Exception e) {
+            System.err.println("Failed to send SMS: " + e.getMessage());
+        }
+    }
+
+    public void sendOtp(String email, OtpType type) {
+        String otp = String.format("%06d", random.nextInt(1_000_000));
+        long ttlSeconds = 120; // universal 2 minutes
+        String key = buildKey(type, email);
+        redisTemplate.opsForValue().set(key, otp, Duration.ofSeconds(ttlSeconds));
+
+        String subject = "Nexashop OTP Verification";
+        String body = "Your OTP is: " + otp + "\n" +
+                "This code will expire in " + ttlSeconds + " seconds.";
+        emailService.sendSimpleEmail(email, subject, body);
+    }
+
+    public boolean verifyOtp(String email, String otp, OtpType type) {
+        String key = buildKey(type, email);
+        String stored = redisTemplate.opsForValue().get(key);
+        boolean ok = stored != null && stored.equals(otp);
+        if (ok) {
+            redisTemplate.delete(key);
+        }
+        return ok;
+    }
+
+    private String buildKey(OtpType type, String email) {
+        return "otp:" + type.name().toLowerCase() + ":" + email.toLowerCase();
+    }
+
+    // Context-based helpers (email/mobile/forgot-password etc.)
+    public void sendOtpWithContext(String identifier, String context, long ttlSeconds) {
+        String otp = String.format("%06d", random.nextInt(1_000_000));
+        String key = buildContextKey(context, identifier);
+        redisTemplate.opsForValue().set(key, otp, Duration.ofSeconds(ttlSeconds));
+
+        // Dispatch based on context
+        if ("SELLER".equals(context) || "user-mobile".equals(context) || "CUSTOMER_MOBILE".equals(context)) {
+            sendSms(identifier, otp);
+        } else if ("user-email".equals(context) || "CUSTOMER_EMAIL".equals(context) || "forgot-password".equals(context)) {
+            String subject = "Nexashop OTP";
+            String body = "Your OTP is: " + otp;
+            emailService.sendSimpleEmail(identifier, subject, body);
+        }
+    }
+
+    public boolean verifyOtpWithContext(String identifier, String otp, String context) {
+        String key = buildContextKey(context, identifier);
+        String stored = redisTemplate.opsForValue().get(key);
+        boolean ok = stored != null && stored.equals(otp);
+        if (ok) {
+            redisTemplate.delete(key);
+        }
+        return ok;
+    }
+
+    private String buildContextKey(String context, String identifier) {
+        // Special case for SELLER OTP requirement
+        if ("SELLER".equals(context)) {
+            return "OTP:SELLER:" + identifier;
+        }
+        if ("user-mobile".equals(context) || "CUSTOMER_MOBILE".equals(context)) {
+            return "OTP:CUSTOMER:MOBILE:" + identifier;
+        }
+        if ("user-email".equals(context) || "CUSTOMER_EMAIL".equals(context)) {
+            return "OTP:CUSTOMER:EMAIL:" + identifier;
+        }
+        return "otp:" + context.toLowerCase() + ":" + identifier.toLowerCase();
+    }
+}

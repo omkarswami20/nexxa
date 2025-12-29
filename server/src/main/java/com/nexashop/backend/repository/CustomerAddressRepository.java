@@ -1,0 +1,10 @@
+package com.nexashop.backend.repository;
+
+import com.nexashop.backend.entity.CustomerAddress;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface CustomerAddressRepository extends JpaRepository<CustomerAddress, Long> {
+    List<CustomerAddress> findByCustomerId(Long customerId);
+}

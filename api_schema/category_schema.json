@@ -1,0 +1,109 @@
+{
+    "controller": "CategoryController",
+    "basePath": "/api/categories",
+    "endpoints": [
+        {
+            "method": "GET",
+            "path": "",
+            "summary": "Get All Categories",
+            "responses": {
+                "200": {
+                    "description": "List of categories",
+                    "content": {
+                        "application/json": {
+                            "example": [
+                                {
+                                    "id": 1,
+                                    "name": "Electronics",
+                                    "description": "Gadgets and devices"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "",
+            "summary": "Create Category (Admin)",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Clothing"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Men and Women closing"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Created category",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": 2,
+                                "name": "Clothing"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "PUT",
+            "path": "/{id}",
+            "summary": "Update Category",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "name": "Fashion"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Updated category"
+                }
+            }
+        },
+        {
+            "method": "DELETE",
+            "path": "/{id}",
+            "summary": "Delete Category",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Deleted"
+                }
+            }
+        }
+    ]
+}

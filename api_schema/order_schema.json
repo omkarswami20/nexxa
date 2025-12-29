@@ -1,0 +1,161 @@
+{
+    "controller": "OrderController",
+    "basePath": "/api",
+    "endpoints": [
+        {
+            "method": "GET",
+            "path": "/orders",
+            "summary": "List Customer Orders",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of orders",
+                    "content": {
+                        "application/json": {
+                            "example": [
+                                {
+                                    "id": 101,
+                                    "totalAmount": 59.98,
+                                    "status": "PLACED",
+                                    "createdAt": "2023-12-01T12:00:00Z"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "GET",
+            "path": "/orders/{orderId}",
+            "summary": "Get Order Detail",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "orderId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Order details with items",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "order": {
+                                    "id": 101,
+                                    "totalAmount": 59.98,
+                                    "status": "PLACED"
+                                },
+                                "items": [
+                                    {
+                                        "id": 1,
+                                        "productNameSnapshot": "T-Shirt",
+                                        "quantity": 2,
+                                        "unitPrice": 29.99
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "GET",
+            "path": "/seller/orders",
+            "summary": "List Seller Order Items",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of order items for seller",
+                    "content": {
+                        "application/json": {
+                            "example": [
+                                {
+                                    "id": 1,
+                                    "productNameSnapshot": "T-Shirt",
+                                    "quantity": 2,
+                                    "unitPrice": 29.99,
+                                    "status": "PLACED",
+                                    "orderId": 101
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "PATCH",
+            "path": "/seller/orders/{orderItemId}/status",
+            "summary": "Update Seller Order Item Status",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "orderItemId",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "enum": [
+                                        "PLACED",
+                                        "SHIPPED",
+                                        "DELIVERED",
+                                        "CANCELLED"
+                                    ],
+                                    "example": "SHIPPED"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Updated status",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": 1,
+                                "status": "SHIPPED"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

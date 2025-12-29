@@ -1,0 +1,146 @@
+{
+    "controller": "OtpController",
+    "basePath": "/api/otp",
+    "endpoints": [
+        {
+            "method": "POST",
+            "path": "/seller/send",
+            "summary": "Send Seller OTP",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "seller@example.com"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "OTP Sent",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "OTP sent"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/seller/verify",
+            "summary": "Verify Seller OTP",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "seller@example.com"
+                                },
+                                "otp": {
+                                    "type": "string",
+                                    "example": "123456"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Valid OTP",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "valid": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/user/send",
+            "summary": "Send User OTP",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "user@example.com"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "OTP Sent",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "OTP sent"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/user/verify",
+            "summary": "Verify User OTP",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "user@example.com"
+                                },
+                                "otp": {
+                                    "type": "string",
+                                    "example": "123456"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Valid OTP",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "valid": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
