@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useRegisterCustomerMutation, useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation } from '../../store/api/api.slice';
+import { useState } from 'react';
+import { useRegisterCustomerMutation, useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation, useResendOtpMutation } from '../../store/api/api.slice';
 import CustomerRegisterView from './CustomerRegisterView';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,6 +19,7 @@ const CustomerRegisterContainer = () => {
     const [registerCustomer, { isLoading, isSuccess, isError, error }] = useRegisterCustomerMutation();
     const [verifyEmail, { isLoading: isVerifyingEmail, error: emailError }] = useVerifyCustomerEmailOtpMutation();
     const [verifyMobile, { isLoading: isVerifyingMobile, error: mobileError }] = useVerifyCustomerMobileOtpMutation();
+    const [resendOtp] = useResendOtpMutation();
 
     const navigate = useNavigate();
 
@@ -74,6 +75,17 @@ const CustomerRegisterContainer = () => {
         }
     };
 
+    const handleResendOtp = async (type) => {
+        const identifier = type === 'mobile' ? formData.mobile : formData.email;
+        if (!identifier) return;
+        try {
+            await resendOtp({ identifier, type }).unwrap();
+            console.log(`Resent OTP to ${type}: ${identifier}`);
+        } catch (err) {
+            console.error(`Failed to resend ${type} OTP`, err);
+        }
+    };
+
     const handleOtpClose = () => {
         setShowOtpModal(false);
         navigate('/customer/login'); // Or keep them here? User might close accidentally. 
@@ -101,6 +113,7 @@ const CustomerRegisterContainer = () => {
                     mobile={formData.mobile}
                     onVerifyEmail={handleVerifyEmail}
                     onVerifyMobile={handleVerifyMobile}
+                    onResendOtp={handleResendOtp}
                     isLoading={isVerifyingEmail || isVerifyingMobile}
                     error={(emailError?.data?.message || mobileError?.data?.message)}
                 />

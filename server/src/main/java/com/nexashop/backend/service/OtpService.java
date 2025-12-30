@@ -33,7 +33,7 @@ public class OtpService {
             new RestTemplate().getForObject(url, String.class);
             System.out.println("SMS Sent to " + mobile);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
-            System.out.println("SMS Skipped: API Key required (401 Unauthorized)");
+            System.out.println("SMS Skipped: API Key required (401 Unauthorized). Check OtpService.java or your SMS provider config.");
         } catch (Exception e) {
             System.err.println("Failed to send SMS: " + e.getMessage());
         }

@@ -20,6 +20,7 @@ public class SellerVerificationController {
     @Operation(summary = "Verify seller email via link token")
     @GetMapping("/verify")
     public ResponseEntity<?> verifySellerEmail(@RequestParam("token") String token) {
+        System.out.println("SellerVerificationController: Received verify request with token: " + token);
         boolean ok = sellerService.verifySellerEmail(token);
         return ok ? ResponseEntity.ok(Map.of("verified", true)) :
                 ResponseEntity.badRequest().body(Map.of("verified", false, "message", "Invalid or expired token"));

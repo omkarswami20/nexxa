@@ -133,4 +133,20 @@ public class CustomerService {
         customerRepository.save(c);
         return true;
     }
+    public void resendOtp(String identifier, String type) {
+        // type: "email" or "mobile"
+        // identifier: email address or mobile number
+        
+        // Validation: Verify user exists
+        if ("mobile".equalsIgnoreCase(type)) {
+             customerRepository.findByMobile(identifier)
+                 .orElseThrow(() -> new IllegalArgumentException("No customer found with this mobile number."));
+             otpService.sendOtpWithContext(identifier, "CUSTOMER_MOBILE", 120);
+        } else {
+             // default to email
+             customerRepository.findByEmail(identifier)
+                 .orElseThrow(() -> new IllegalArgumentException("No customer found with this email."));
+             otpService.sendOtpWithContext(identifier, "CUSTOMER_EMAIL", 120);
+        }
+    }
 }

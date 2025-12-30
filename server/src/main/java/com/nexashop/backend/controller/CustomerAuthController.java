@@ -71,4 +71,19 @@ public class CustomerAuthController {
         return ok ? ResponseEntity.ok(Map.of("message", "Password updated")) :
                 ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired OTP"));
     }
+    @Operation(summary = "Resend OTP")
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@RequestBody Map<String, String> body) {
+        String identifier = body.get("identifier");
+        String type = body.get("type"); // "email" or "mobile"
+        if (identifier == null || type == null) {
+             return ResponseEntity.badRequest().body(Map.of("message", "Identifier and type are required"));
+        }
+        try {
+            customerService.resendOtp(identifier, type);
+            return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

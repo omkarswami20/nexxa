@@ -20,6 +20,9 @@ public class SellerRegisterRequest {
     @NotBlank(message = "Store name is required")
     private String storeName;
 
+    @NotBlank(message = "Mobile number is required")
+    private String mobile;
+
     // Getters and Setters
     public String getName() {
         return name;
@@ -51,5 +54,13 @@ public class SellerRegisterRequest {
 
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 }

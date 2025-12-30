@@ -97,6 +97,9 @@ export const api = createApi({
         verifyCustomerMobileOtp: builder.mutation({
             query: ({ mobile, otp }) => ({ url: '/customers/verify-mobile-otp', method: 'POST', body: { mobile, otp } }),
         }),
+        resendOtp: builder.mutation({
+            query: ({ identifier, type }) => ({ url: '/customers/resend-otp', method: 'POST', body: { identifier, type } }),
+        }),
         requestForgotPassword: builder.mutation({
             query: (email) => ({ url: '/customers/forgot-password/request', method: 'POST', body: { email } }),
         }),
@@ -402,6 +405,20 @@ export const api = createApi({
                 body: { email, otp },
             }),
         }),
+        verifySellerMobileOtp: builder.mutation({
+            query: ({ mobile, otp }) => ({
+                url: '/sellers/mobile/verify-otp',
+                method: 'POST',
+                body: { mobile, otp },
+            }),
+        }),
+        resendSellerOtp: builder.mutation({
+            query: ({ identifier }) => ({
+                url: '/sellers/mobile/send-otp',
+                method: 'POST',
+                body: { identifier },
+            }),
+        }),
         sendUserOtp: builder.mutation({
             query: (email) => ({
                 url: '/otp/user/send',
@@ -457,11 +474,14 @@ export const {
     useRegisterSellerMutation,
     useLoginSellerMutation,
     useVerifySellerEmailMutation,
+    useVerifySellerMobileOtpMutation,
+    useResendSellerOtpMutation,
     // Customer Auth/Profile/Addresses
     useRegisterCustomerMutation,
     useLoginCustomerMutation,
     useVerifyCustomerEmailOtpMutation,
     useVerifyCustomerMobileOtpMutation,
+    useResendOtpMutation,
     useRequestForgotPasswordMutation,
     useVerifyForgotPasswordMutation,
     useGetCustomerProfileQuery,

@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Box, Alert } from '@mui/material';
 
-const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile, isLoading, error }) => {
+const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile, onResendOtp, isLoading, error }) => {
     const [emailOtp, setEmailOtp] = useState('');
     const [mobileOtp, setMobileOtp] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
     const [mobileVerified, setMobileVerified] = useState(false);
 
+    // Timer State
+    const [emailTimer, setEmailTimer] = useState(60);
+    const [mobileTimer, setMobileTimer] = useState(60);
+
+    React.useEffect(() => {
+        let emailInterval;
+        if (emailTimer > 0 && !emailVerified) {
+            emailInterval = setInterval(() => setEmailTimer((prev) => prev - 1), 1000);
+        }
+        return () => clearInterval(emailInterval);
+    }, [emailTimer, emailVerified]);
+
+    React.useEffect(() => {
+        let mobileInterval;
+        if (mobileTimer > 0 && !mobileVerified) {
+            mobileInterval = setInterval(() => setMobileTimer((prev) => prev - 1), 1000);
+        }
+        return () => clearInterval(mobileInterval);
+    }, [mobileTimer, mobileVerified]);
+
     const handleVerifyEmail = async () => {
         if (emailOtp) {
             await onVerifyEmail(email, emailOtp);
-            setEmailVerified(true); // Ideally wait for promise to resolve, but container handles real status
+            setEmailVerified(true);
         }
     };
 
@@ -18,6 +38,14 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
         if (mobileOtp) {
             await onVerifyMobile(mobile, mobileOtp);
             setMobileVerified(true);
+        }
+    };
+
+    const handleResend = (type) => {
+        if (onResendOtp) {
+            onResendOtp(type);
+            if (type === 'email') setEmailTimer(60);
+            if (type === 'mobile') setMobileTimer(60);
         }
     };
 
@@ -33,7 +61,17 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
 
                 {/* Email OTP Section */}
                 <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" gutterBottom>Email Verification ({email})</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="subtitle2">Email Verification ({email})</Typography>
+                        <Button
+                            variant="text"
+                            size="small"
+                            disabled={emailTimer > 0 || emailVerified}
+                            onClick={() => handleResend('email')}
+                        >
+                            {emailTimer > 0 ? `Resend in ${emailTimer}s` : 'Resend OTP'}
+                        </Button>
+                    </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         <TextField
                             size="small"
@@ -55,7 +93,17 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
 
                 {/* Mobile OTP Section */}
                 <Box>
-                    <Typography variant="subtitle2" gutterBottom>Mobile Verification ({mobile})</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="subtitle2">Mobile Verification ({mobile})</Typography>
+                        <Button
+                            variant="text"
+                            size="small"
+                            disabled={mobileTimer > 0 || mobileVerified}
+                            onClick={() => handleResend('mobile')}
+                        >
+                            {mobileTimer > 0 ? `Resend in ${mobileTimer}s` : 'Resend OTP'}
+                        </Button>
+                    </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         <TextField
                             size="small"

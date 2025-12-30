@@ -1,1 +1,6 @@
 
+
+
+# JAVA BACKEND BUILD FILES
+server/target/
+**/target/

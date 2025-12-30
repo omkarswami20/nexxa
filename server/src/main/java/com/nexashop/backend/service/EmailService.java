@@ -32,6 +32,9 @@ public class EmailService {
             System.out.println("Email sent to " + to);
         } catch (Exception e) {
             System.err.println("Failed to send email to " + to + ": " + e.getMessage());
+            if (e.getMessage().contains("AuthenticationFailedException") || e.getMessage().contains("535")) {
+                 System.err.println("TIP: Check application.properties spring.mail.password. It should be an App Password, not your login password.");
+            }
         }
     }
 

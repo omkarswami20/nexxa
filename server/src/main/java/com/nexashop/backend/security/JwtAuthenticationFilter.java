@@ -38,8 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         + token.substring(0, Math.min(10, token.length())) + "...");
                 email = jwtUtils.getEmailFromToken(token);
                 System.out.println("JwtAuthenticationFilter: Email from token: " + email);
-            } else {
-                System.out.println("JwtAuthenticationFilter: No Bearer token found in header");
             }
 
             if (email != null && jwtUtils.validateToken(token)) {
@@ -58,8 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (JwtException | IllegalArgumentException e) {
             // Token is invalid/expired. We log it and move on.
             // The user will be unauthenticated.
-            logger.error("JWT Authentication failed: " + e.getMessage());
-            e.printStackTrace();
+            // logger.error("JWT Authentication failed: " + e.getMessage()); // Optional: reduce level to debug or warn
+            System.out.println("JwtAuthenticationFilter: Token invalid/expired (" + e.getMessage() + "). Proceeding as anonymous.");
         }
 
         filterChain.doFilter(request, response);

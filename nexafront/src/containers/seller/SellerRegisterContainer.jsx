@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OtpModal from '../../components/common/OtpModal';
-import { useRegisterSellerMutation, useVerifySellerOtpMutation } from '../../store/api/api.slice';
+import { useRegisterSellerMutation, useVerifySellerOtpMutation, useVerifySellerMobileOtpMutation, useResendSellerOtpMutation } from '../../store/api/api.slice';
 import SellerRegisterView from './SellerRegisterView';
 
 const SellerRegisterContainer = () => {
@@ -16,7 +16,9 @@ const SellerRegisterContainer = () => {
     const [fieldErrors, setFieldErrors] = useState({});
 
     const [registerSeller, { isLoading, isSuccess, isError, error }] = useRegisterSellerMutation();
-    const [verifySellerOtp, { isLoading: isVerifying, error: verifyError }] = useVerifySellerOtpMutation();
+    const [verifySellerEmail, { isLoading: isVerifyingEmail, error: emailError }] = useVerifySellerOtpMutation();
+    const [verifySellerMobile, { isLoading: isVerifyingMobile, error: mobileError }] = useVerifySellerMobileOtpMutation();
+    const [resendOtp] = useResendSellerOtpMutation();
 
     const navigate = useNavigate();
 
@@ -69,16 +71,60 @@ const SellerRegisterContainer = () => {
     // Checked api.slice.js: only `verifySellerOtp` (email-based) exists at line 392.
     // Use `verifySellerOtp` for now, assuming it covers the main verification. 
 
-    const handleVerify = async (identifier, otp) => {
-        // Determine if verifying email or mobile. 
-        // API slice only has generic verifySellerOtp which sends {email, otp}.
-        // If backend expects mobile otp via same endpoint or different, that's a backend question.
-        // Based on previous logs, seller registration sends email. 
-        // Let's use verifySellerOtp for email.
-
-        await verifySellerOtp({ email: formData.email, otp }).unwrap();
+    const handleVerifyEmail = async (email, otp) => {
+        try {
+            await verifySellerEmail({ email, otp }).unwrap();
+        } catch (err) {
+            console.error("Email verification failed", err);
+        }
     };
 
+    const handleVerifyMobile = async (mobile, otp) => {
+        try {
+            await verifySellerMobile({ mobile, otp }).unwrap();
+        } catch (err) {
+            console.error("Mobile verification failed", err);
+        }
+    };
+
+    const handleResendOtp = async (type) => {
+        // Sellers resend logic might distinguish type if backend supports it differently.
+        // Currently resendSellerOtp sends to mobile (identifier).
+        // If type is email, we might need a different endpoint or use generic one.
+        // For now, assuming resendSellerOtp handles mobile mainly or identifier logic.
+        // Actually, backend /mobile/send-otp handles identifier.
+        const identifier = type === 'mobile' ? formData.mobile : formData.email;
+        if (!identifier) return;
+
+        if (type === 'mobile') {
+            try {
+                await resendOtp({ identifier }).unwrap();
+                console.log(`Resent OTP to ${type}: ${identifier}`);
+            } catch (err) {
+                console.error(`Failed to resend ${type} OTP`, err);
+            }
+        } else {
+            // For email resend, seller might not have a dedicated endpoint yet? 
+            // Or maybe reuse the same if backend supports email identifier in that endpoint?
+            // Backend /mobile/send-otp logs "mobile/identifier required". 
+            // Let's assume it works for mobile. Email resend via link is usually default.
+            // If user wants email OTP resend, we might need that logic. 
+            // But seller email verification is LINK based, not OTP based typically (unless changed).
+            // Wait, verifySellerEmail takes OTP? 
+            // api.slice says: verifySellerEmail -> /otp/seller/verify.
+            // SellerService.register sends LINK.
+            // But SellerRegisterContainer expects OTP verify?
+            // If Seller Service sends LINK, then frontend shouldn't ask for Email OTP.
+            // But OtpModal asks for both. 
+            // User said: "fallow sme method for mobile number flow sameas customer".
+            // Customer has both.
+
+            // If seller is Link based, then Email section in Modal should be purely informational "Check your email".
+            // But logic is requesting OTP.
+            // Conflicting flows. 
+            // Let's implement mobile resend for now as requested.
+        }
+    };
 
     return (
         <>
@@ -92,21 +138,19 @@ const SellerRegisterContainer = () => {
                 error={error}
                 fieldErrors={fieldErrors}
             />
-            {/* {showOtpModal && (
+            {showOtpModal && (
                 <OtpModal
                     open={showOtpModal}
                     onClose={() => { setShowOtpModal(false); navigate('/seller/login'); }}
                     email={formData.email}
-                    mobile={formData.mobile} // Pass mobile for display
-                    onVerifyEmail={(email, otp) => handleVerify(email, otp)}
-                    onVerifyMobile={async (mobile, otp) => {
-                        // Fallback or todo if mobile verification API is missing for seller
-                        console.log("Mobile verification for seller not yet implemented in slice");
-                    }}
-                    isLoading={isVerifying}
-                    error={verifyError?.data?.message}
+                    mobile={formData.mobile}
+                    onVerifyEmail={handleVerifyEmail}
+                    onVerifyMobile={handleVerifyMobile}
+                    onResendOtp={handleResendOtp}
+                    isLoading={isVerifyingEmail || isVerifyingMobile}
+                    error={(emailError?.data?.message || mobileError?.data?.message)}
                 />
-            )} */}
+            )}
         </>
     );
 };

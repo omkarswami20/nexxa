@@ -54,6 +54,7 @@ public class SellerService {
         seller.setName(request.getName());
         seller.setEmail(request.getEmail());
         seller.setPassword(passwordEncoder.encode(request.getPassword()));
+        seller.setMobile(request.getMobile());
         seller.setStoreName(request.getStoreName());
         seller.setStatus(Seller.SellerStatus.PENDING_APPROVAL);
 
@@ -63,11 +64,17 @@ public class SellerService {
         String link = System.getProperty("app.frontend.url", "http://localhost:5173") + "/seller/verify?token=" + token;
         emailService.sendSimpleEmail(savedSeller.getEmail(), "Verify your email - Nexashop",
                 "Dear " + savedSeller.getName() + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link + "\n\nBest Regards,\nNexashop Team");
+        
+        // Trigger Mobile OTP (2 minutes TTL)
+        if (savedSeller.getMobile() != null && !savedSeller.getMobile().isBlank()) {
+            otpService.sendOtpWithContext(savedSeller.getMobile(), "SELLER", 120);
+        }
         return savedSeller;
     }
 
     public boolean verifySellerEmail(String token) {
-        String email = verificationService.consumeToken("seller-email", token);
+        // Do not delete token immediately to allow idempotency (e.g., StrictMode double-fetch)
+        String email = verificationService.consumeToken("seller-email", token, false);
         if (email == null) return false;
         return sellerRepository.findByEmail(email).map(s -> {
             s.setEmailVerified(true);
