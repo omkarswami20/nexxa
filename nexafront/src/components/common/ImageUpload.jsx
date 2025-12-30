@@ -46,8 +46,9 @@ const ImageUpload = ({ value, onChange, onUpload, isLoading, error, maxSizeMB = 
         if (onUpload) {
             try {
                 const result = await onUpload(file);
-                if (result?.data?.url) {
-                    onChange(result.data.url);
+                const url = result?.url || result?.data?.url;
+                if (url) {
+                    onChange(url);
                 }
             } catch (err) {
                 setLocalError('Failed to upload image. Please try again.');

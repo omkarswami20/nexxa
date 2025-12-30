@@ -287,9 +287,12 @@ export const api = createApi({
             ],
         }),
         uploadProductImage: builder.mutation({
-            query: (file) => {
+            query: ({ file, productName }) => {
                 const formData = new FormData();
                 formData.append('file', file);
+                if (productName) {
+                    formData.append('productName', productName);
+                }
                 return {
                     url: '/upload/product-image',
                     method: 'POST',

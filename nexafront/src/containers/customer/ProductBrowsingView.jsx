@@ -185,8 +185,9 @@ const ProductBrowsingView = ({
                                                         component="img"
                                                         height="200"
                                                         image={
-                                                            product.imageUrl ||
-                                                            'https://via.placeholder.com/400x300?text=No+Image'
+                                                            product.imageUrl
+                                                                ? `http://localhost:8080/uploads/products/${product.imageUrl}`
+                                                                : 'https://via.placeholder.com/400x300?text=No+Image'
                                                         }
                                                         alt={product.name}
                                                     />

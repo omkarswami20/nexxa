@@ -22,7 +22,8 @@ public class FileUploadController {
 
     @Operation(summary = "Upload product image", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/product-image")
-    public ResponseEntity<?> uploadProductImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadProductImage(@RequestParam("file") MultipartFile file,
+                                                @RequestParam(value = "productName", required = false) String productName) {
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("File is empty");
@@ -33,7 +34,7 @@ public class FileUploadController {
                 return ResponseEntity.badRequest().body("File size exceeds 5MB limit");
             }
 
-            String fileUrl = fileStorageService.saveFile(file);
+            String fileUrl = fileStorageService.saveFile(file, productName);
             
             Map<String, String> response = new HashMap<>();
             response.put("url", fileUrl);

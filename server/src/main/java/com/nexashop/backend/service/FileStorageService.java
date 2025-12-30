@@ -21,6 +21,10 @@ public class FileStorageService {
     private String productDir;
 
     public String saveFile(MultipartFile file) throws IOException {
+        return saveFile(file, null);
+    }
+
+    public String saveFile(MultipartFile file, String productName) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
@@ -37,20 +41,51 @@ public class FileStorageService {
             Files.createDirectories(uploadPath);
         }
 
-        // Generate unique filename
+        // Generate filename
         String originalFilename = file.getOriginalFilename();
         String extension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        } else {
+            // Default extension if missing
+            extension = ".jpg";
         }
-        String filename = UUID.randomUUID().toString() + extension;
+
+        String filename;
+        if (productName != null && !productName.trim().isEmpty()) {
+            // Sanitize product name: lowercase, numbers and hyphens only
+            String sanitized = productName.trim().toLowerCase().replaceAll("[^a-z0-9]", "-");
+            // Remove multiple hyphens
+            sanitized = sanitized.replaceAll("-+", "-");
+            // Remove leading/trailing hyphens
+            if (sanitized.startsWith("-")) sanitized = sanitized.substring(1);
+            if (sanitized.endsWith("-")) sanitized = sanitized.substring(0, sanitized.length() - 1);
+            
+            if (sanitized.isEmpty()) {
+                 filename = UUID.randomUUID().toString() + extension;
+            } else {
+                // Find unique suffix
+                int counter = 1;
+                while (true) {
+                    String suffix = String.format("-%04d", counter);
+                    filename = sanitized + suffix + extension;
+                    Path attempt = uploadPath.resolve(filename);
+                    if (!Files.exists(attempt)) {
+                        break;
+                    }
+                    counter++;
+                }
+            }
+        } else {
+            filename = UUID.randomUUID().toString() + extension;
+        }
 
         // Save file
         Path filePath = uploadPath.resolve(filename);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Return relative URL
-        return "/uploads/" + productDir + "/" + filename;
+        // Return filename only
+        return filename;
     }
 
     public boolean deleteFile(String fileUrl) {

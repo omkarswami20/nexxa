@@ -151,9 +151,9 @@ const SellerDashboardContainer = () => {
         setProductToUpdateStock(null);
     };
 
-    const handleImageUpload = async (file) => {
+    const handleImageUpload = async (file, productName) => {
         try {
-            const result = await uploadProductImage(file).unwrap();
+            const result = await uploadProductImage({ file, productName }).unwrap();
             return result;
         } catch (err) {
             throw err;

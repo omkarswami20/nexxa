@@ -202,9 +202,9 @@ const ProductFormDialog = ({
                         <Box>
                             <InputLabel sx={{ mb: 1 }}>Product Image</InputLabel>
                             <ImageUpload
-                                value={formData.imageUrl}
+                                value={formData.imageUrl ? `http://localhost:8080/uploads/products/${formData.imageUrl}` : ''}
                                 onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
-                                onUpload={onImageUpload}
+                                onUpload={(file) => onImageUpload(file, formData.name)}
                                 isLoading={imageUploadLoading}
                                 error={imageUploadError}
                             />
