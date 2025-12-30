@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import SellerDashboardView from './SellerDashboardView';
+import SellerDashboardView from '../../components/seller/SellerDashboardView';
 import {
     useGetSellerProductsQuery,
     useCreateProductMutation,
@@ -10,7 +10,7 @@ import {
     useUpdateProductStockMutation,
     useUploadProductImageMutation,
     useGetCategoriesQuery,
-} from '../../store/api/api.slice';
+} from '../../store/api/api.apislice';
 import {
     setSelectedProduct,
     clearSelectedProduct,

@@ -9,6 +9,11 @@ import java.time.Instant;
         @Index(columnList = "mobile", unique = true)
 })
 public class Customer {
+    
+    public enum AccountStatus {
+        PENDING,
+        ACTIVE
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,6 +35,10 @@ public class Customer {
 
     @Column(name = "is_mobile_verified", nullable = false)
     private boolean mobileVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus = AccountStatus.PENDING;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
@@ -55,6 +64,8 @@ public class Customer {
     public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
     public boolean isMobileVerified() { return mobileVerified; }
     public void setMobileVerified(boolean mobileVerified) { this.mobileVerified = mobileVerified; }
+    public AccountStatus getAccountStatus() { return accountStatus; }
+    public void setAccountStatus(AccountStatus accountStatus) { this.accountStatus = accountStatus; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

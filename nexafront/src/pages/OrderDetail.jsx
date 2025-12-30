@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useGetOrderByIdQuery } from '../store/api/api.slice';
+import { useGetOrderByIdQuery } from '../store/api/api.apislice';
 import { Box, Typography, Divider, List, ListItem, ListItemText, Button } from '@mui/material';
 
 const OrderDetail = () => {

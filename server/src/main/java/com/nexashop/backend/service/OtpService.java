@@ -75,16 +75,28 @@ public class OtpService {
     public void sendOtpWithContext(String identifier, String context, long ttlSeconds) {
         String otp = String.format("%06d", random.nextInt(1_000_000));
         String key = buildContextKey(context, identifier);
+        
+        System.out.println("=== OTP Service Debug ===");
+        System.out.println("Context: " + context);
+        System.out.println("Identifier: " + identifier);
+        System.out.println("Redis Key: " + key);
+        System.out.println("OTP: " + otp);
+        System.out.println("TTL: " + ttlSeconds + " seconds");
+        
         redisTemplate.opsForValue().set(key, otp, Duration.ofSeconds(ttlSeconds));
+        System.out.println("OTP stored in Redis with key: " + key);
 
         // Dispatch based on context
         if ("SELLER".equals(context) || "user-mobile".equals(context) || "CUSTOMER_MOBILE".equals(context)) {
+            System.out.println("Dispatching SMS for mobile: " + identifier);
             sendSms(identifier, otp);
         } else if ("user-email".equals(context) || "CUSTOMER_EMAIL".equals(context) || "forgot-password".equals(context)) {
+            System.out.println("Dispatching Email for: " + identifier);
             String subject = "Nexashop OTP";
             String body = "Your OTP is: " + otp;
             emailService.sendSimpleEmail(identifier, subject, body);
         }
+        System.out.println("=== End OTP Service Debug ===");
     }
 
     public boolean verifyOtpWithContext(String identifier, String otp, String context) {

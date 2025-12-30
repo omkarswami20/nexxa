@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useGetAllSellersQuery, useUpdateSellerStatusMutation } from '../../store/api/api.slice';
-import AdminDashboardView from './AdminDashboardView';
+import { useGetAllSellersQuery, useUpdateSellerStatusMutation } from '../../store/api/api.apislice';
+import AdminDashboardView from '../../components/admin/AdminDashboardView';
 
 const AdminDashboardContainer = () => {
     const { data: allSellers, isLoading } = useGetAllSellersQuery();
@@ -17,7 +17,7 @@ const AdminDashboardContainer = () => {
 
     const handleApprove = async (sellerId) => {
         try {
-            await updateStatus({ sellerId, newStatus: 'APPROVED' }).unwrap();
+            await updateStatus({ sellerId, newStatus: 'ACTIVE' }).unwrap();
         } catch (err) {
             console.error('Failed to approve:', err);
         }
@@ -49,9 +49,9 @@ const AdminDashboardContainer = () => {
             case 0: // All
                 return allSellers;
             case 1: // Pending
-                return allSellers.filter(s => s.status === 'PENDING_APPROVAL');
+                return allSellers.filter(s => s.status === 'PENDING_ADMIN_APPROVAL');
             case 2: // Approved
-                return allSellers.filter(s => s.status === 'APPROVED');
+                return allSellers.filter(s => s.status === 'ACTIVE');
             case 3: // Denied
                 return allSellers.filter(s => s.status === 'DENIED');
             case 4: // Categories

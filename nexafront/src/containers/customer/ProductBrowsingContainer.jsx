@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetAllProductsQuery, useGetCategoriesQuery } from '../../store/api/api.slice';
-import ProductBrowsingView from './ProductBrowsingView';
+import { useGetAllProductsQuery, useGetCategoriesQuery } from '../../store/api/api.apislice';
+import ProductBrowsingView from '../../components/customer/ProductBrowsingView';
 import { useNavigate } from 'react-router-dom';
 
 const ProductBrowsingContainer = () => {

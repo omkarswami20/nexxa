@@ -7,6 +7,7 @@ import com.nexashop.backend.dto.UpdateSellerStatusRequest;
 import com.nexashop.backend.entity.RefreshToken;
 import com.nexashop.backend.entity.Seller;
 import com.nexashop.backend.exception.ResourceNotFoundException;
+import com.nexashop.backend.exception.VerificationRequiredException;
 import com.nexashop.backend.repository.SellerRepository;
 import com.nexashop.backend.security.JwtUtils;
 import org.springframework.security.access.AccessDeniedException;
@@ -56,7 +57,7 @@ public class SellerService {
         seller.setPassword(passwordEncoder.encode(request.getPassword()));
         seller.setMobile(request.getMobile());
         seller.setStoreName(request.getStoreName());
-        seller.setStatus(Seller.SellerStatus.PENDING_APPROVAL);
+        seller.setStatus(Seller.SellerStatus.PENDING);
 
         Seller savedSeller = sellerRepository.save(seller);
         // Send seller email verification link (24h TTL)
@@ -78,6 +79,11 @@ public class SellerService {
         if (email == null) return false;
         return sellerRepository.findByEmail(email).map(s -> {
             s.setEmailVerified(true);
+            // If both email and mobile are verified, set status to PENDING_ADMIN_APPROVAL
+            boolean mobileVerified = s.getMobile() == null || s.getMobile().isBlank() || s.isMobileVerified();
+            if (mobileVerified) {
+                s.setStatus(Seller.SellerStatus.PENDING_ADMIN_APPROVAL);
+            }
             sellerRepository.save(s);
             return true;
         }).orElse(false);
@@ -93,6 +99,10 @@ public class SellerService {
         if (ok) {
             sellerRepository.findByMobile(mobile).ifPresent(s -> {
                 s.setMobileVerified(true);
+                // If both email and mobile are verified, set status to PENDING_ADMIN_APPROVAL
+                if (s.isEmailVerified()) {
+                    s.setStatus(Seller.SellerStatus.PENDING_ADMIN_APPROVAL);
+                }
                 sellerRepository.save(s);
             });
         }
@@ -107,10 +117,26 @@ public class SellerService {
             throw new BadCredentialsException("Invalid Credentials");
         }
 
-        if (seller.getStatus() == Seller.SellerStatus.PENDING_APPROVAL) {
-            throw new AccessDeniedException("Login Failed: Please wait for Admin Approval.");
-        } else if (seller.getStatus() == Seller.SellerStatus.DENIED) {
+        // Check verification status
+        boolean emailVerified = seller.isEmailVerified();
+        boolean mobileVerified = seller.getMobile() == null || seller.getMobile().isBlank() || seller.isMobileVerified();
+        String accountStatus = seller.getStatus().name();
+
+        // Check if account is denied
+        if (seller.getStatus() == Seller.SellerStatus.DENIED) {
             throw new AccessDeniedException("Login Failed: Your account was rejected.");
+        }
+
+        // Check if verification is incomplete or account is not active
+        if (!emailVerified || !mobileVerified || seller.getStatus() != Seller.SellerStatus.ACTIVE) {
+            throw new VerificationRequiredException(
+                "Please complete verification to login",
+                emailVerified,
+                mobileVerified,
+                accountStatus,
+                seller.getEmail(),
+                seller.getMobile() != null ? seller.getMobile() : ""
+            );
         }
 
         String token = jwtUtils.generateToken(seller.getEmail(), "ROLE_SELLER");
@@ -120,7 +146,7 @@ public class SellerService {
     }
 
     public List<Seller> getPendingSellers() {
-        return sellerRepository.findByStatus(Seller.SellerStatus.PENDING_APPROVAL);
+        return sellerRepository.findByStatus(Seller.SellerStatus.PENDING_ADMIN_APPROVAL);
     }
 
     public List<Seller> getAllSellers() {

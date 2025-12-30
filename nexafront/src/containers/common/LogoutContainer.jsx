@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useBlocker } from 'react-router-dom';
-import { useLogoutUserMutation } from '../../store/api/api.slice';
+import { useLogoutUserMutation } from '../../store/api/api.apislice';
 import { logout } from '../../store/slices/auth.slice';
 import LogoutModal from '../../components/common/LogoutModal';
 

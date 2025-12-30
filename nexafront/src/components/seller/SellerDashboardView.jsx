@@ -28,7 +28,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import ProductFormDialog from './ProductFormDialog';
-import ConfirmationModal from '../../components/common/ConfirmationModal';
+import ConfirmationModal from '../common/ConfirmationModal';
 import ProductFilters from './ProductFilters';
 import StockUpdateDialog from './StockUpdateDialog';
 import LogoutContainer from '../../containers/common/LogoutContainer';

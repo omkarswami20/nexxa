@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetSellerOrderItemsQuery, useUpdateSellerOrderItemStatusMutation } from '../store/api/api.slice';
+import { useGetSellerOrderItemsQuery, useUpdateSellerOrderItemStatusMutation } from '../store/api/api.apislice';
 import { Box, Typography, List, ListItem, ListItemText, Divider, FormControl, InputLabel, Select, MenuItem, Chip } from '@mui/material';
 
 const statusOptions = ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELED'];

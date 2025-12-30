@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Grid, Alert } from '@mui/material';
-import { useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation } from '../store/api/api.slice';
+import { useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation } from '../store/api/api.apislice';
 import { useNavigate } from 'react-router-dom';
 
 const VerifyOtp = ({ mode = 'email' }) => {

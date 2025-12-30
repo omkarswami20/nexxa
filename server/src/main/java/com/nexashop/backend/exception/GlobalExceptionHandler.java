@@ -57,6 +57,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(VerificationRequiredException.class)
+    public ResponseEntity<?> handleVerificationRequiredException(VerificationRequiredException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("error", "VERIFICATION_REQUIRED");
+        body.put("message", ex.getMessage());
+        body.put("emailVerified", ex.isEmailVerified());
+        body.put("mobileVerified", ex.isMobileVerified());
+        body.put("accountStatus", ex.getAccountStatus());
+        body.put("email", ex.getEmail());
+        body.put("mobile", ex.getMobile());
+        body.put("path", request.getDescription(false));
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();

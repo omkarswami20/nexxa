@@ -32,7 +32,7 @@ public class Seller {
     private SellerStatus status;
 
     public Seller() {
-        this.status = SellerStatus.PENDING_APPROVAL;
+        this.status = SellerStatus.PENDING;
     }
 
     public Seller(String name, String email, String password, String storeName) {
@@ -40,7 +40,7 @@ public class Seller {
         this.email = email;
         this.password = password;
         this.storeName = storeName;
-        this.status = SellerStatus.PENDING_APPROVAL;
+        this.status = SellerStatus.PENDING;
     }
 
     // Getters and Setters
@@ -109,9 +109,11 @@ public class Seller {
     }
 
     public enum SellerStatus {
+        PENDING,
+        PENDING_ADMIN_APPROVAL,
         APPROVED,
         DENIED,
-        PENDING_APPROVAL
+        ACTIVE
     }
 
     public SellerStatus getStatus() {
