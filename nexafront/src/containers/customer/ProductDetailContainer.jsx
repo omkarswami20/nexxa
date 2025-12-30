@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGetProductByIdQuery, useSetCartItemQuantityMutation } from '../../store/api/api.slice';
-import ProductDetailView from './ProductDetailView';
+import { useGetProductByIdQuery, useSetCartItemQuantityMutation } from '../../store/api/api.apislice';
+import ProductDetailView from '../../components/customer/ProductDetailView';
 
 const ProductDetailContainer = () => {
     const { id } = useParams();

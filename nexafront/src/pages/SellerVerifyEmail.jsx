@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useVerifySellerEmailMutation } from '../store/api/api.slice';
+import { useVerifySellerEmailMutation } from '../store/api/api.apislice';
 import { Box, Typography, CircularProgress, Alert, Container, Button } from '@mui/material';
 
 const SellerVerifyEmail = () => {

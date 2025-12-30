@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useRegisterCustomerMutation, useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation, useResendOtpMutation } from '../../store/api/api.slice';
-import CustomerRegisterView from './CustomerRegisterView';
+import { useRegisterCustomerMutation, useVerifyCustomerEmailOtpMutation, useVerifyCustomerMobileOtpMutation, useResendOtpMutation } from '../../store/api/api.apislice';
+import CustomerRegisterView from '../../components/customer/CustomerRegisterView';
 import { useNavigate } from 'react-router-dom';
 
 import OtpModal from '../../components/common/OtpModal';

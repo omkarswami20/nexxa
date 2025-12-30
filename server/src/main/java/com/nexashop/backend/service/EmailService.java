@@ -76,7 +76,7 @@ public class EmailService {
         String subject = "Nexashop | Seller Application Status Update";
         String text;
 
-        if (seller.getStatus() == Seller.SellerStatus.APPROVED) {
+        if (seller.getStatus() == Seller.SellerStatus.ACTIVE) {
             String loginLink = frontendUrl + "/seller/login";
 
             text =
@@ -89,7 +89,7 @@ public class EmailService {
                     "🔗 Seller Login:\n" +
                     loginLink + "\n\n" +
 
-                    "We’re excited to have you onboard and look forward to your success on Nexashop.\n\n" +
+                    "We're excited to have you onboard and look forward to your success on Nexashop.\n\n" +
 
                     "Best wishes,\n" +
                     "Nexashop Team\n" +

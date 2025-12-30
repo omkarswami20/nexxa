@@ -116,19 +116,21 @@ const AdminDashboardView = ({
                                                     label={seller.status.replace('_', ' ')}
                                                     sx={{
                                                         fontWeight: 500,
-                                                        bgcolor: seller.status === 'APPROVED' ? 'success.light' :
+                                                        bgcolor: seller.status === 'ACTIVE' ? 'success.light' :
                                                             seller.status === 'DENIED' ? 'error.light' :
-                                                                'warning.light',
-                                                        color: seller.status === 'APPROVED' ? 'success.dark' :
+                                                            seller.status === 'PENDING_ADMIN_APPROVAL' ? 'warning.light' :
+                                                                'info.light',
+                                                        color: seller.status === 'ACTIVE' ? 'success.dark' :
                                                             seller.status === 'DENIED' ? 'error.dark' :
-                                                                'warning.dark',
+                                                            seller.status === 'PENDING_ADMIN_APPROVAL' ? 'warning.dark' :
+                                                                'info.dark',
                                                     }}
                                                     size="small"
                                                 />
                                             </TableCell>
                                             <TableCell align="right" sx={{ py: 2.5 }}>
                                                 {/* Actions for Pending Sellers */}
-                                                {seller.status === 'PENDING_APPROVAL' && (
+                                                {seller.status === 'PENDING_ADMIN_APPROVAL' && (
                                                     <>
                                                         <Button
                                                             startIcon={<CheckCircleIcon />}
@@ -153,7 +155,7 @@ const AdminDashboardView = ({
                                                 )}
 
                                                 {/* Actions for Approved Sellers (Can be Rejected/Banned) */}
-                                                {seller.status === 'APPROVED' && (
+                                                {seller.status === 'ACTIVE' && (
                                                     <Button
                                                         startIcon={<CancelIcon />}
                                                         color="error"

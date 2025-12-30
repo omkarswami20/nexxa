@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Grid, Alert } from '@mui/material';
-import { useRequestForgotPasswordMutation, useVerifyForgotPasswordMutation } from '../store/api/api.slice';
+import { useRequestForgotPasswordMutation, useVerifyForgotPasswordMutation } from '../store/api/api.apislice';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {

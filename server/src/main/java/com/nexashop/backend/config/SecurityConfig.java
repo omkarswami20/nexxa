@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/otp/**").permitAll()
                         .requestMatchers("/api/customers/register", "/api/customers/login").permitAll()
                         .requestMatchers("/api/customers/verify-email-otp", "/api/customers/verify-mobile-otp").permitAll()
+                        .requestMatchers("/api/customers/resend-otp").permitAll()
                         .requestMatchers("/api/customers/forgot-password/**").permitAll()
                         .requestMatchers("/api/sellers/verify").permitAll()
                         .requestMatchers("/api/sellers/mobile/**").permitAll()

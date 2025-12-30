@@ -14,7 +14,7 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import ImageUpload from '../../components/common/ImageUpload';
+import ImageUpload from '../common/ImageUpload';
 
 const ProductFormDialog = ({
     open,

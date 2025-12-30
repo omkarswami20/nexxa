@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useGetCartQuery, useCheckoutMutation, useGetAddressesQuery } from '../../store/api/api.slice';
-import CheckoutView from './CheckoutView';
+import { useGetCartQuery, useCheckoutMutation, useGetAddressesQuery } from '../../store/api/api.apislice';
+import CheckoutView from '../../components/customer/CheckoutView';
 import { useNavigate } from 'react-router-dom';
 
 const CheckoutContainer = () => {

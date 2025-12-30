@@ -28,7 +28,7 @@ import {
     useCreateCategoryMutation,
     useUpdateCategoryMutation,
     useDeleteCategoryMutation,
-} from '../../store/api/api.slice';
+} from '../../store/api/api.apislice';
 
 const CategoryManagement = () => {
     const { data: categories, isLoading, error } = useGetCategoriesQuery();

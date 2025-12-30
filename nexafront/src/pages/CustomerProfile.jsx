@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid, TextField, Button, Alert, Tabs, Tab, Paper } from '@mui/material';
-import { useGetCustomerProfileQuery, useUpdateCustomerProfileMutation, useChangeCustomerPasswordMutation } from '../store/api/api.slice';
+import { useGetCustomerProfileQuery, useUpdateCustomerProfileMutation, useChangeCustomerPasswordMutation } from '../store/api/api.apislice';
 import CustomerAddresses from './CustomerAddresses';
 import PersonIcon from '@mui/icons-material/Person';
 import LocationOnIcon from '@mui/icons-material/LocationOn';

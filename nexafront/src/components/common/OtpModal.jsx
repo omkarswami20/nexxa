@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Box, Alert } from '@mui/material';
 
-const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile, onResendOtp, isLoading, error }) => {
+const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile, onResendOtp, isLoading, error, hideEmailSection = false }) => {
     const [emailOtp, setEmailOtp] = useState('');
     const [mobileOtp, setMobileOtp] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
@@ -54,12 +54,15 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
             <DialogTitle>Verify Your Account</DialogTitle>
             <DialogContent>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Please enter the OTPs sent to your email and mobile number.
+                    {hideEmailSection 
+                        ? `Please enter the OTP sent to your mobile number.` 
+                        : `Please enter the OTPs sent to your email and mobile number.`}
                 </Typography>
 
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
                 {/* Email OTP Section */}
+                {!hideEmailSection && (
                 <Box sx={{ mb: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="subtitle2">Email Verification ({email})</Typography>
@@ -90,6 +93,7 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
                         </Button>
                     </Box>
                 </Box>
+                )}
 
                 {/* Mobile OTP Section */}
                 <Box>
@@ -125,7 +129,7 @@ const OtpModal = ({ open, onClose, email, mobile, onVerifyEmail, onVerifyMobile,
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
-                {(emailVerified && mobileVerified) && (
+                {(hideEmailSection ? mobileVerified : (emailVerified && mobileVerified)) && (
                     <Button variant="contained" color="success" onClick={onClose}>
                         Continue to Login
                     </Button>

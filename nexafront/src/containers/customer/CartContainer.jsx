@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { useGetCartQuery, useSetCartItemQuantityMutation, useRemoveCartItemMutation } from '../../store/api/api.slice';
-import CartView from './CartView';
+import { useGetCartQuery, useSetCartItemQuantityMutation, useRemoveCartItemMutation } from '../../store/api/api.apislice';
+import CartView from '../../components/customer/CartView';
 import { useNavigate } from 'react-router-dom';
 
 const CartContainer = () => {

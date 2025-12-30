@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useLoginAdminMutation } from '../../store/api/api.slice';
+import { useLoginAdminMutation } from '../../store/api/api.apislice';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../store/slices/auth.slice';
 import { useNavigate } from 'react-router-dom';
-import AdminLoginView from './AdminLoginView';
+import AdminLoginView from '../../components/admin/AdminLoginView';
 
 const AdminLoginContainer = () => {
     const [email, setEmail] = useState('');

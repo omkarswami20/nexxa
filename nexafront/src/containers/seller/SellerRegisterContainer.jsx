@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OtpModal from '../../components/common/OtpModal';
-import { useRegisterSellerMutation, useVerifySellerOtpMutation, useVerifySellerMobileOtpMutation, useResendSellerOtpMutation } from '../../store/api/api.slice';
-import SellerRegisterView from './SellerRegisterView';
+import { useRegisterSellerMutation, useVerifySellerOtpMutation, useVerifySellerMobileOtpMutation, useResendSellerOtpMutation } from '../../store/api/api.apislice';
+import SellerRegisterView from '../../components/seller/SellerRegisterView';
 
 const SellerRegisterContainer = () => {
     const [formData, setFormData] = useState({
@@ -149,6 +149,7 @@ const SellerRegisterContainer = () => {
                     onResendOtp={handleResendOtp}
                     isLoading={isVerifyingEmail || isVerifyingMobile}
                     error={(emailError?.data?.message || mobileError?.data?.message)}
+                    hideEmailSection={true}
                 />
             )}
         </>
