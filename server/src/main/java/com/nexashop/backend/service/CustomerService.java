@@ -19,18 +19,22 @@ public class CustomerService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
+
     private final OtpService otpService;
+    private final EmailService emailService;
 
     public CustomerService(CustomerRepository customerRepository,
                            PasswordEncoder passwordEncoder,
                            JwtUtils jwtUtils,
                            RefreshTokenService refreshTokenService,
-                           OtpService otpService) {
+                           OtpService otpService,
+                           EmailService emailService) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
         this.otpService = otpService;
+        this.emailService = emailService;
     }
 
     public Customer register(CustomerRegisterRequest req) {
@@ -83,6 +87,7 @@ public class CustomerService {
             customerRepository.findByEmail(email).ifPresent(c -> {
                 c.setEmailVerified(true);
                 customerRepository.save(c);
+                checkAndSendWelcomeEmail(c);
             });
         }
         return ok;
@@ -94,6 +99,7 @@ public class CustomerService {
             customerRepository.findByMobile(mobile).ifPresent(c -> {
                 c.setMobileVerified(true);
                 customerRepository.save(c);
+                checkAndSendWelcomeEmail(c);
             });
         }
         return ok;
@@ -147,6 +153,16 @@ public class CustomerService {
              customerRepository.findByEmail(identifier)
                  .orElseThrow(() -> new IllegalArgumentException("No customer found with this email."));
              otpService.sendOtpWithContext(identifier, "CUSTOMER_EMAIL", 120);
+        }
+    }
+
+
+    private void checkAndSendWelcomeEmail(Customer c) {
+        boolean emailVerified = c.isEmailVerified();
+        boolean mobileVerified = c.getMobile() == null || c.getMobile().isBlank() || c.isMobileVerified();
+
+        if (emailVerified && mobileVerified) {
+            emailService.sendCustomerWelcomeEmail(c.getEmail(), c.getName());
         }
     }
 }

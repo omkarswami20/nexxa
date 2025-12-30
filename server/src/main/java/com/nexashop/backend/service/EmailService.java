@@ -32,46 +32,118 @@ public class EmailService {
             System.out.println("Email sent to " + to);
         } catch (Exception e) {
             System.err.println("Failed to send email to " + to + ": " + e.getMessage());
-            if (e.getMessage().contains("AuthenticationFailedException") || e.getMessage().contains("535")) {
-                 System.err.println("TIP: Check application.properties spring.mail.password. It should be an App Password, not your login password.");
+            if (e.getMessage() != null &&
+                (e.getMessage().contains("AuthenticationFailedException") ||
+                 e.getMessage().contains("535"))) {
+
+                System.err.println(
+                    "TIP: Use an App Password for spring.mail.password (not your email login password)."
+                );
             }
         }
     }
 
+    /**
+     * Email sent after seller registration
+     */
     public void sendVerificationEmail(Seller seller) {
-        String subject = "Welcome to Nexashop - Application Received";
-        String text = "Dear " + seller.getName() + ",\n\n" +
-                "Thank you for registering with Nexashop. Your application has been received and is currently Pending Approval.\n"
-                +
-                "We will notify you once an Admin reviews your details.\n\n" +
-                "Best Regards,\n" +
-                "Nexashop Team";
+        String subject = "Nexashop | Seller Application Received";
+
+        String text =
+                "Hello " + seller.getName() + ",\n\n" +
+
+                "Thank you for registering as a Seller on Nexashop.\n\n" +
+
+                "✅ We have successfully received your application.\n" +
+                "🔍 Our team will now review your details for verification.\n\n" +
+
+                "You will be notified once the review process is complete.\n\n" +
+
+                "If you have any questions, feel free to reach out to our support team.\n\n" +
+
+                "Warm regards,\n" +
+                "Nexashop Team\n" +
+                "—\n" +
+                "Building trusted online commerce";
+
         sendSimpleEmail(seller.getEmail(), subject, text);
     }
 
+    /**
+     * Email sent when seller status is updated (APPROVED / DENIED)
+     */
     public void sendStatusNotification(Seller seller, String rejectionReason) {
-        String subject = "Nexashop - Application Status Update";
+        String subject = "Nexashop | Seller Application Status Update";
         String text;
 
         if (seller.getStatus() == Seller.SellerStatus.APPROVED) {
             String loginLink = frontendUrl + "/seller/login";
-            text = "Dear " + seller.getName() + ",\n\n" +
-                    "Congratulations! Your account has been APPROVED.\n" +
-                    "You can now login to your dashboard and start selling.\n\n" +
-                    "Click here to login: " + loginLink + "\n\n" +
-                    "Best Regards,\n" +
-                    "Nexashop Team";
+
+            text =
+                    "Hello " + seller.getName() + ",\n\n" +
+
+                    "🎉 Congratulations! Your Seller account has been APPROVED.\n\n" +
+
+                    "You can now log in to your Seller Dashboard and start listing your products.\n\n" +
+
+                    "🔗 Seller Login:\n" +
+                    loginLink + "\n\n" +
+
+                    "We’re excited to have you onboard and look forward to your success on Nexashop.\n\n" +
+
+                    "Best wishes,\n" +
+                    "Nexashop Team\n" +
+                    "—\n" +
+                    "Empowering sellers to grow online";
+
         } else if (seller.getStatus() == Seller.SellerStatus.DENIED) {
-            text = "Dear " + seller.getName() + ",\n\n" +
-                    "We are sorry, but your application was DENIED.\n";
+
+            text =
+                    "Hello " + seller.getName() + ",\n\n" +
+
+                    "Thank you for your interest in becoming a Seller on Nexashop.\n\n" +
+
+                    "After careful review, we regret to inform you that your application has been declined at this time.\n";
+
             if (rejectionReason != null && !rejectionReason.trim().isEmpty()) {
-                text += "Reason: " + rejectionReason + "\n";
+                text += "\n📌 Reason:\n" + rejectionReason + "\n";
             }
-            text += "\nBest Regards,\nNexashop Team";
+
+            text +=
+                    "\nYou may reapply in the future once the concerns are addressed.\n\n" +
+
+                    "Thank you for your understanding.\n\n" +
+
+                    "Sincerely,\n" +
+                    "Nexashop Team";
         } else {
-            return; // No email for other status changes
+            return; // No email for other statuses
         }
 
         sendSimpleEmail(seller.getEmail(), subject, text);
     }
+  public void sendCustomerWelcomeEmail(String to, String name) {
+    String subject = "Welcome to Nexashop | Account Verified 🎉";
+
+    String text =
+            "Hello " + name + ",\n\n" +
+
+            "Welcome to Nexashop! We’re happy to let you know that your account has been successfully verified. ✅\n\n" +
+
+            "You can now explore a wide range of products, enjoy a smooth shopping experience, and place orders with confidence.\n\n" +
+
+            "🛍️ Start shopping anytime and discover great deals curated just for you.\n\n" +
+
+            "If you need any assistance, our support team is always here to help.\n\n" +
+
+            "Happy shopping!\n\n" +
+
+            "Warm regards,\n" +
+            "Nexashop Team\n" +
+            "—\n" +
+            "Your trusted online shopping destination";
+
+    sendSimpleEmail(to, subject, text);
+}
+
 }

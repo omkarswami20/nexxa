@@ -28,9 +28,15 @@ public class OtpService {
         System.out.println("--------------------------------------------------");
 
         try {
-            // TODO: Add auth_key or correct params when available
             String url = "https://ciacloud.in/otpapi.php?number=" + mobile + "&otp=" + otp;
-            new RestTemplate().getForObject(url, String.class);
+            
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("Authorization", "Basic dGVjaHA6VGVjaFBAIUAj");
+            
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+            
+            new RestTemplate().exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+            
             System.out.println("SMS Sent to " + mobile);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
             System.out.println("SMS Skipped: API Key required (401 Unauthorized). Check OtpService.java or your SMS provider config.");
