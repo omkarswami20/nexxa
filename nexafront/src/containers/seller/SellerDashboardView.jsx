@@ -241,9 +241,10 @@ const SellerDashboardView = ({
                                     {products.map((product) => (
                                         <TableRow key={product?.id ?? Math.random()} hover>
                                             <TableCell>
+                                                {/* <img width={"200px"} src={`http://localhost:8080/uploads/products/${product.imageUrl}`} alt={product?.name || 'Product'} /> */}
                                                 {product?.imageUrl ? (
                                                     <Avatar
-                                                        src={`http://localhost:8080${product.imageUrl}`}
+                                                        src={`http://localhost:8080/uploads/products/${product.imageUrl}`}
                                                         alt={product?.name || 'Product'}
                                                         variant="rounded"
                                                         sx={{ width: 56, height: 56 }}

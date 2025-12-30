@@ -1,6 +1,12 @@
+# Maven
+target/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
 
 
-
-# JAVA BACKEND BUILD FILES
-server/target/
-**/target/
+# Uploaded files (runtime data)
+uploads/
