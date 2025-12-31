@@ -2,15 +2,19 @@ package com.nexashop.backend.controller;
 
 import com.nexashop.backend.service.SellerService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/sellers", "/api/seller"})
+@RequestMapping({"/api/v1/sellers", "/api/v1/seller"})
 public class SellerVerificationController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SellerVerificationController.class);
+    
     private final SellerService sellerService;
 
     public SellerVerificationController(SellerService sellerService) {
@@ -20,8 +24,13 @@ public class SellerVerificationController {
     @Operation(summary = "Verify seller email via link token")
     @GetMapping("/verify")
     public ResponseEntity<?> verifySellerEmail(@RequestParam("token") String token) {
-        System.out.println("SellerVerificationController: Received verify request with token: " + token);
+        logger.debug("Received seller email verification request");
         boolean ok = sellerService.verifySellerEmail(token);
+        if (ok) {
+            logger.info("Seller email verified successfully");
+        } else {
+            logger.warn("Seller email verification failed - invalid or expired token");
+        }
         return ok ? ResponseEntity.ok(Map.of("verified", true)) :
                 ResponseEntity.badRequest().body(Map.of("verified", false, "message", "Invalid or expired token"));
     }

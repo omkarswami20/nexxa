@@ -9,6 +9,9 @@ import com.nexashop.backend.exception.ResourceNotFoundException;
 import com.nexashop.backend.repository.CategoryRepository;
 import com.nexashop.backend.repository.ProductRepository;
 import com.nexashop.backend.repository.SellerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,34 +99,28 @@ public class ProductService {
     }
 
     public Map<String, Object> getAllActiveProductsPaginated(String category, String search, int limit, int offset) {
-        List<Product> products = productRepository.findByStatus(ProductStatus.ACTIVE);
-
-        // Filter by Category
-        if (category != null && !category.isEmpty()) {
-            products = products.stream()
-                    .filter(p -> p.getCategory() != null && p.getCategory().getName().equalsIgnoreCase(category))
-                    .collect(Collectors.toList());
-        }
-
-        // Filter by Search (Name or Description)
-        if (search != null && !search.isEmpty()) {
-            String searchLower = search.toLowerCase();
-            products = products.stream()
-                    .filter(p -> (p.getName() != null && p.getName().toLowerCase().contains(searchLower)) ||
-                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(searchLower)))
-                    .collect(Collectors.toList());
-        }
-
-        int total = products.size();
-        int fromIndex = Math.min(offset, total);
-        int toIndex = Math.min(offset + limit, total);
-        List<Product> paginatedProducts = products.subList(fromIndex, toIndex);
+        // Convert offset to page number (Spring Data uses 0-based page numbers)
+        int pageNumber = offset / limit;
+        Pageable pageable = PageRequest.of(pageNumber, limit);
+        
+        // Normalize empty strings to null for query
+        String categoryParam = (category != null && category.trim().isEmpty()) ? null : category;
+        String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
+        
+        // Use database-level query with filters
+        Page<Product> productPage = productRepository.findActiveProductsWithFilters(
+            ProductStatus.ACTIVE,
+            categoryParam,
+            searchParam,
+            pageable
+        );
 
         Map<String, Object> response = new HashMap<>();
-        response.put("products", paginatedProducts);
-        response.put("total", total);
-        response.put("page", (offset / limit) + 1);
-        response.put("pageSize", limit);
+        response.put("products", productPage.getContent());
+        response.put("total", productPage.getTotalElements());
+        response.put("page", productPage.getNumber() + 1); // Convert to 1-based page number
+        response.put("pageSize", productPage.getSize());
+        response.put("totalPages", productPage.getTotalPages());
 
         return response;
     }
@@ -132,46 +129,40 @@ public class ProductService {
     public Map<String, Object> getSellerProducts(String sellerEmail, String status, String category, String search,
             int limit, int offset) {
         Seller seller = getSellerByEmail(sellerEmail);
-        List<Product> products = productRepository.findBySellerId(seller.getId());
-
-        // 1. Filter by Status
-        if (status != null && !status.isEmpty()) {
+        
+        // Convert offset to page number (Spring Data uses 0-based page numbers)
+        int pageNumber = offset / limit;
+        Pageable pageable = PageRequest.of(pageNumber, limit);
+        
+        // Parse status enum, null if invalid or not provided
+        ProductStatus statusParam = null;
+        if (status != null && !status.trim().isEmpty()) {
             try {
-                ProductStatus productStatus = ProductStatus.valueOf(status.toUpperCase());
-                products = products.stream()
-                        .filter(p -> p.getStatus() == productStatus)
-                        .collect(Collectors.toList());
+                statusParam = ProductStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
-                // Ignore invalid status filter
+                // Invalid status - will be ignored in query
             }
         }
-
-        // 2. Filter by Category
-        if (category != null && !category.isEmpty()) {
-            products = products.stream()
-                    .filter(p -> p.getCategory() != null && p.getCategory().getName().equalsIgnoreCase(category))
-                    .collect(Collectors.toList());
-        }
-
-        // 3. Filter by Search (Name or Description)
-        if (search != null && !search.isEmpty()) {
-            String searchLower = search.toLowerCase();
-            products = products.stream()
-                    .filter(p -> (p.getName() != null && p.getName().toLowerCase().contains(searchLower)) ||
-                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(searchLower)))
-                    .collect(Collectors.toList());
-        }
-
-        int total = products.size();
-        int fromIndex = Math.min(offset, total);
-        int toIndex = Math.min(offset + limit, total);
-        List<Product> paginatedProducts = products.subList(fromIndex, toIndex);
+        
+        // Normalize empty strings to null for query
+        String categoryParam = (category != null && category.trim().isEmpty()) ? null : category;
+        String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
+        
+        // Use database-level query with filters
+        Page<Product> productPage = productRepository.findSellerProductsWithFilters(
+            seller.getId(),
+            statusParam,
+            categoryParam,
+            searchParam,
+            pageable
+        );
 
         Map<String, Object> response = new HashMap<>();
-        response.put("products", paginatedProducts);
-        response.put("total", total);
-        response.put("page", (offset / limit) + 1);
-        response.put("pageSize", limit);
+        response.put("products", productPage.getContent());
+        response.put("total", productPage.getTotalElements());
+        response.put("page", productPage.getNumber() + 1); // Convert to 1-based page number
+        response.put("pageSize", productPage.getSize());
+        response.put("totalPages", productPage.getTotalPages());
 
         return response;
     }
@@ -226,3 +217,4 @@ public class ProductService {
         }
     }
 }
+

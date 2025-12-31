@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @Tag(name = "Customer Addresses")
-@RequestMapping("/api/customers/addresses")
+@RequestMapping("/api/v1/customers/addresses")
 public class CustomerAddressController {
 
     private final CustomerRepository customerRepository;

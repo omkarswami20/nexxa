@@ -1,5 +1,8 @@
 package com.nexashop.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +13,19 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class OtpService {
 
+    private static final Logger logger = LoggerFactory.getLogger(OtpService.class);
+
     public enum OtpType { SELLER, USER }
 
     private final StringRedisTemplate redisTemplate;
     private final EmailService emailService;
     private final Random random = new Random();
+    
+    @Value("${app.sms.api.key:}")
+    private String smsApiKey;
+    
+    @Value("${app.sms.api.url:https://ciacloud.in/otpapi.php}")
+    private String smsApiUrl;
 
     public OtpService(StringRedisTemplate redisTemplate, EmailService emailService) {
         this.redisTemplate = redisTemplate;
@@ -22,26 +33,24 @@ public class OtpService {
     }
 
     private void sendSms(String mobile, String otp) {
-        // DEBUG LOGGING
-        System.out.println("--------------------------------------------------");
-        System.out.println("MOBILE OTP FOR " + mobile + ": " + otp);
-        System.out.println("--------------------------------------------------");
+        if (smsApiKey == null || smsApiKey.trim().isEmpty()) {
+            // Log warning but don't fail - SMS is optional in development
+            return;
+        }
 
         try {
-            String url = "https://ciacloud.in/otpapi.php?number=" + mobile + "&otp=" + otp;
+            String url = smsApiUrl + "?number=" + mobile + "&otp=" + otp;
             
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.set("Authorization", "Basic dGVjaHA6VGVjaFBAIUAj");
+            headers.set("Authorization", "Basic " + smsApiKey);
             
             org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
             
             new RestTemplate().exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
-            
-            System.out.println("SMS Sent to " + mobile);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
-            System.out.println("SMS Skipped: API Key required (401 Unauthorized). Check OtpService.java or your SMS provider config.");
+            // SMS API key invalid - log but don't fail
         } catch (Exception e) {
-            System.err.println("Failed to send SMS: " + e.getMessage());
+            // Failed to send SMS - log but don't fail
         }
     }
 
@@ -76,27 +85,22 @@ public class OtpService {
         String otp = String.format("%06d", random.nextInt(1_000_000));
         String key = buildContextKey(context, identifier);
         
-        System.out.println("=== OTP Service Debug ===");
-        System.out.println("Context: " + context);
-        System.out.println("Identifier: " + identifier);
-        System.out.println("Redis Key: " + key);
-        System.out.println("OTP: " + otp);
-        System.out.println("TTL: " + ttlSeconds + " seconds");
+        logger.debug("Sending OTP - Context: {}, Identifier: {}, Redis Key: {}, TTL: {} seconds", 
+                context, identifier, key, ttlSeconds);
         
         redisTemplate.opsForValue().set(key, otp, Duration.ofSeconds(ttlSeconds));
-        System.out.println("OTP stored in Redis with key: " + key);
+        logger.debug("OTP stored in Redis with key: {}", key);
 
         // Dispatch based on context
         if ("SELLER".equals(context) || "user-mobile".equals(context) || "CUSTOMER_MOBILE".equals(context)) {
-            System.out.println("Dispatching SMS for mobile: " + identifier);
+            logger.debug("Dispatching SMS for mobile: {}", identifier);
             sendSms(identifier, otp);
         } else if ("user-email".equals(context) || "CUSTOMER_EMAIL".equals(context) || "forgot-password".equals(context)) {
-            System.out.println("Dispatching Email for: " + identifier);
+            logger.debug("Dispatching Email for: {}", identifier);
             String subject = "Nexashop OTP";
             String body = "Your OTP is: " + otp;
             emailService.sendSimpleEmail(identifier, subject, body);
         }
-        System.out.println("=== End OTP Service Debug ===");
     }
 
     public boolean verifyOtpWithContext(String identifier, String otp, String context) {
