@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @Tag(name = "Checkout")
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class CheckoutController {
 
     private final OrderService orderService;

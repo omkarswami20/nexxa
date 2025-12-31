@@ -6,6 +6,8 @@ import com.nexashop.backend.dto.LoginResponse;
 import com.nexashop.backend.entity.Customer;
 import com.nexashop.backend.exception.VerificationRequiredException;
 import com.nexashop.backend.repository.CustomerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import com.nexashop.backend.security.JwtUtils;
 @Service
 @Transactional
 public class CustomerService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
@@ -169,16 +173,16 @@ public class CustomerService {
         if ("mobile".equalsIgnoreCase(type)) {
              customerRepository.findByMobile(identifier)
                  .orElseThrow(() -> new IllegalArgumentException("No customer found with this mobile number."));
-             System.out.println("Resending mobile OTP to: " + identifier);
+             logger.info("Resending mobile OTP to: {}", identifier);
              otpService.sendOtpWithContext(identifier, "CUSTOMER_MOBILE", 120);
-             System.out.println("Mobile OTP sent successfully to: " + identifier);
+             logger.debug("Mobile OTP sent successfully to: {}", identifier);
         } else {
              // default to email
              customerRepository.findByEmail(identifier)
                  .orElseThrow(() -> new IllegalArgumentException("No customer found with this email."));
-             System.out.println("Resending email OTP to: " + identifier);
+             logger.info("Resending email OTP to: {}", identifier);
              otpService.sendOtpWithContext(identifier, "CUSTOMER_EMAIL", 120);
-             System.out.println("Email OTP sent successfully to: " + identifier);
+             logger.debug("Email OTP sent successfully to: {}", identifier);
         }
     }
 

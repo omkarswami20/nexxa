@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    
     private final JwtUtils jwtUtils;
 
     public JwtAuthenticationFilter(JwtUtils jwtUtils) {
@@ -34,10 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
-                System.out.println("JwtAuthenticationFilter: Processing token: "
-                        + token.substring(0, Math.min(10, token.length())) + "...");
+                logger.debug("Processing JWT token");
                 email = jwtUtils.getEmailFromToken(token);
-                System.out.println("JwtAuthenticationFilter: Email from token: " + email);
+                logger.debug("Email extracted from token: {}", email);
             }
 
             if (email != null && jwtUtils.validateToken(token)) {
@@ -52,12 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         email, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.debug("Authentication successful for user: {} with role: {}", email, role);
             }
         } catch (JwtException | IllegalArgumentException e) {
             // Token is invalid/expired. We log it and move on.
             // The user will be unauthenticated.
-            // logger.error("JWT Authentication failed: " + e.getMessage()); // Optional: reduce level to debug or warn
-            System.out.println("JwtAuthenticationFilter: Token invalid/expired (" + e.getMessage() + "). Proceeding as anonymous.");
+            logger.debug("JWT token validation failed: {}. Proceeding as anonymous.", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

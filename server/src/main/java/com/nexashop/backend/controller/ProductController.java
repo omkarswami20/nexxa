@@ -1,6 +1,7 @@
 package com.nexashop.backend.controller;
 
 import com.nexashop.backend.dto.ProductRequest;
+import com.nexashop.backend.dto.ProductResponse;
 import com.nexashop.backend.entity.Product;
 import com.nexashop.backend.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -91,15 +93,30 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int offset) {
         // If pagination parameters are provided, return paginated response
         if (limit > 0 || offset > 0 || category != null || search != null) {
-            return ResponseEntity.ok(productService.getAllActiveProductsPaginated(category, search, limit, offset));
+            Map<String, Object> result = productService.getAllActiveProductsPaginated(category, search, limit, offset);
+            // Convert products to DTOs
+            if (result.containsKey("products") && result.get("products") instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Product> products = (List<Product>) result.get("products");
+                List<ProductResponse> productResponses = products.stream()
+                        .map(ProductResponse::new)
+                        .collect(Collectors.toList());
+                result.put("products", productResponses);
+            }
+            return ResponseEntity.ok(result);
         }
         // Otherwise return simple list for backward compatibility
-        return ResponseEntity.ok(productService.getAllActiveProducts());
+        List<Product> products = productService.getAllActiveProducts();
+        List<ProductResponse> productResponses = products.stream()
+                .map(ProductResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(productResponses);
     }
 
     @Operation(summary = "Get product by ID (Public - Active only)")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok(new ProductResponse(product));
     }
 }

@@ -12,16 +12,28 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    @Value("${jwt.secret:NexaShopSecretKeyForJwtTokenGenerationShouldBeLongEnough123456}")
+    @Value("${app.jwt.secret:${jwt.secret:}}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${app.jwt.expiration-ms:${jwt.expiration:86400000}}")
     private long expirationTime;
 
     private Key key;
 
     @PostConstruct
     public void init() {
+        if (secret == null || secret.trim().isEmpty()) {
+            throw new IllegalStateException(
+                "JWT secret must be configured via JWT_SECRET environment variable or app.jwt.secret property. " +
+                "For production, use a strong secret (minimum 64 characters)."
+            );
+        }
+        if (secret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT secret is too short. For security, use a secret with at least 32 characters. " +
+                "Set JWT_SECRET environment variable with a strong secret."
+            );
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 

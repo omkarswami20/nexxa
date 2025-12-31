@@ -1,5 +1,6 @@
 package com.nexashop.backend.controller;
 
+import com.nexashop.backend.exception.InvalidRefreshTokenException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
     private final com.nexashop.backend.security.JwtUtils jwtUtils;
@@ -39,7 +40,7 @@ public class AuthController {
                     String token = jwtUtils.generateToken(email, role);
                     return ResponseEntity
                             .ok(new com.nexashop.backend.dto.TokenRefreshResponse(token, requestRefreshToken));
-                }).orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+                }).orElseThrow(() -> new InvalidRefreshTokenException("Refresh token is not in database or has expired"));
     }
 
     @Operation(summary = "Logout user", security = @SecurityRequirement(name = "bearerAuth"))

@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/sellers")
+@RequestMapping("/api/v1/sellers")
 public class SellerController {
 
     private final SellerService sellerService;

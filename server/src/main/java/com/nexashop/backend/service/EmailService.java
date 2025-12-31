@@ -1,6 +1,8 @@
 package com.nexashop.backend.service;
 
 import com.nexashop.backend.entity.Seller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 @Service
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+    
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
@@ -29,16 +33,13 @@ public class EmailService {
             message.setText(text);
             message.setFrom("Nexashop <" + fromEmail + ">");
             mailSender.send(message);
-            System.out.println("Email sent to " + to);
+            logger.info("Email sent successfully to: {}", to);
         } catch (Exception e) {
-            System.err.println("Failed to send email to " + to + ": " + e.getMessage());
+            logger.error("Failed to send email to {}: {}", to, e.getMessage(), e);
             if (e.getMessage() != null &&
                 (e.getMessage().contains("AuthenticationFailedException") ||
                  e.getMessage().contains("535"))) {
-
-                System.err.println(
-                    "TIP: Use an App Password for spring.mail.password (not your email login password)."
-                );
+                logger.warn("Email authentication failed. TIP: Use an App Password for spring.mail.password (not your email login password).");
             }
         }
     }

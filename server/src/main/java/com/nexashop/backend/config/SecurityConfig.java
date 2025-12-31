@@ -32,9 +32,18 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Explicitly
-                                                                                                         // allow
-                                                                                                         // OPTIONS
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Explicitly allow OPTIONS
+                        // Public endpoints (v1)
+                        .requestMatchers("/api/v1/sellers/register", "/api/v1/sellers/login", "/api/v1/admin/login").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh-token").permitAll()
+                        .requestMatchers("/api/v1/otp/**").permitAll()
+                        .requestMatchers("/api/v1/customers/register", "/api/v1/customers/login").permitAll()
+                        .requestMatchers("/api/v1/customers/verify-email-otp", "/api/v1/customers/verify-mobile-otp").permitAll()
+                        .requestMatchers("/api/v1/customers/resend-otp").permitAll()
+                        .requestMatchers("/api/v1/customers/forgot-password/**").permitAll()
+                        .requestMatchers("/api/v1/sellers/verify").permitAll()
+                        .requestMatchers("/api/v1/sellers/mobile/**", "/api/v1/seller/mobile/**").permitAll()
+                        // Backward compatibility - keep old paths working temporarily
                         .requestMatchers("/api/sellers/register", "/api/sellers/login", "/api/admin/login").permitAll()
                         .requestMatchers("/api/auth/refresh-token").permitAll()
                         .requestMatchers("/api/otp/**").permitAll()
@@ -44,13 +53,22 @@ public class SecurityConfig {
                         .requestMatchers("/api/customers/forgot-password/**").permitAll()
                         .requestMatchers("/api/sellers/verify").permitAll()
                         .requestMatchers("/api/sellers/mobile/**").permitAll()
+                        // Authenticated endpoints (v1)
+                        .requestMatchers("/api/v1/cart/**").authenticated()
+                        .requestMatchers("/api/v1/checkout").authenticated()
+                        .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/seller/orders/**").authenticated()
+                        .requestMatchers("/api/v1/products/seller", "/api/v1/products/seller/**").authenticated()
+                        // Backward compatibility for authenticated endpoints
                         .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers("/api/checkout").authenticated()
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/seller/orders/**").authenticated()
                         .requestMatchers("/api/products/seller", "/api/products/seller/**").authenticated()
+                        // Public resources
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll() // Backward compatibility
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())

@@ -1,5 +1,7 @@
 package com.nexashop.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,9 @@ import java.util.UUID;
 
 @Service
 public class VerificationService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(VerificationService.class);
+    
     private final StringRedisTemplate redisTemplate;
 
     public VerificationService(StringRedisTemplate redisTemplate) {
@@ -17,7 +22,7 @@ public class VerificationService {
     public String createToken(String context, String identifier, Duration ttl) {
         String token = UUID.randomUUID().toString();
         String key = buildKey(context, token);
-        System.out.println("VerificationService: Creating token. Key: " + key + ", Identifier: " + identifier);
+        logger.debug("Creating verification token - Context: {}, Key: {}, Identifier: {}", context, key, identifier);
         redisTemplate.opsForValue().set(key, identifier, ttl);
         return token;
     }
@@ -29,7 +34,8 @@ public class VerificationService {
     public String consumeToken(String context, String token, boolean delete) {
         String key = buildKey(context, token);
         String identifier = redisTemplate.opsForValue().get(key);
-        System.out.println("VerificationService: Consuming token. Key: " + key + ", Found Identifier: " + identifier + ", Delete: " + delete);
+        logger.debug("Consuming verification token - Context: {}, Key: {}, Found Identifier: {}, Delete: {}", 
+                context, key, identifier, delete);
         if (identifier != null && delete) {
             redisTemplate.delete(key);
         }
