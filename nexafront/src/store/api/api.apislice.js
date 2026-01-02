@@ -60,7 +60,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Seller', 'Admin', 'Product', 'Categories', 'CartItem', 'Order', 'OrderItem'],
+    tagTypes: ['Seller', 'Admin', 'Product', 'Categories', 'CartItem', 'Order', 'OrderItem', 'Address'],
     endpoints: (builder) => ({
         // Seller Endpoints
         registerSeller: builder.mutation({
@@ -120,17 +120,21 @@ export const api = createApi({
         getAddresses: builder.query({
             query: () => '/customers/addresses',
             transformResponse: transformAddressListResponse,
+            providesTags: ['Address'],
         }),
         createAddress: builder.mutation({
             query: (data) => ({ url: '/customers/addresses', method: 'POST', body: data }),
             transformResponse: transformAddressResponse,
+            invalidatesTags: ['Address'],
         }),
         updateAddress: builder.mutation({
             query: ({ id, ...data }) => ({ url: `/customers/addresses/${id}`, method: 'PUT', body: data }),
             transformResponse: transformAddressResponse,
+            invalidatesTags: ['Address'],
         }),
         deleteAddress: builder.mutation({
             query: (id) => ({ url: `/customers/addresses/${id}`, method: 'DELETE' }),
+            invalidatesTags: ['Address'],
         }),
 
         // Admin Endpoints
@@ -346,7 +350,7 @@ export const api = createApi({
                 method: 'POST',
                 body: { addressId, address },
             }),
-            invalidatesTags: [{ type: 'CartItem', id: 'LIST' }, { type: 'Order', id: 'LIST' }],
+            invalidatesTags: [{ type: 'CartItem', id: 'LIST' }, { type: 'Order', id: 'LIST' }, 'Address'],
         }),
 
         // Orders (Customer)

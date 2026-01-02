@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @Tag(name = "Orders")
-@RequestMapping("/api/v1")
+@RequestMapping({"/api/v1", "/api"})
 public class OrderController {
 
     private final OrderService orderService;

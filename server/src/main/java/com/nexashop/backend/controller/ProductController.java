@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping({"/api/v1/products", "/api/products"})
 public class ProductController {
 
     private final ProductService productService;
@@ -41,8 +41,18 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int offset,
             Principal principal) {
 
-        return ResponseEntity.ok(productService.getSellerProducts(
-                principal.getName(), status, category, search, limit, offset));
+        Map<String, Object> result = productService.getSellerProducts(
+                principal.getName(), status, category, search, limit, offset);
+        // Convert products to DTOs to avoid Hibernate proxy serialization issues
+        if (result.containsKey("products") && result.get("products") instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Product> products = (List<Product>) result.get("products");
+            List<ProductResponse> productResponses = products.stream()
+                    .map(ProductResponse::new)
+                    .collect(Collectors.toList());
+            result.put("products", productResponses);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Get list of all product names for current seller", security = @SecurityRequirement(name = "bearerAuth"))

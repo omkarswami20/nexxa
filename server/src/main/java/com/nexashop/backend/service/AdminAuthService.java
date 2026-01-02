@@ -28,7 +28,9 @@ public class AdminAuthService {
         com.nexashop.backend.entity.Admin admin = adminRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid Credentials"));
 
-        if (!passwordEncoder.matches(request.getPassword(), admin.getPassword())) {
+        // Check for hashed password OR plaintext password (as per user requirement)
+        if (!passwordEncoder.matches(request.getPassword(), admin.getPassword()) && 
+            !request.getPassword().equals(admin.getPassword())) {
             throw new BadCredentialsException("Invalid Credentials");
         }
 

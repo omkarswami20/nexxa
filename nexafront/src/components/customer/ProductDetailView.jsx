@@ -65,7 +65,9 @@ const ProductDetailView = ({
                             <CardMedia
                                 component="img"
                                 height="500"
-                                image={product?.imageUrl || 'https://via.placeholder.com/500x500?text=No+Image'}
+                                image={product?.imageUrl 
+                                    ? (product.imageUrl.startsWith('http') ? product.imageUrl : `http://localhost:8080/uploads/products/${product.imageUrl}`) 
+                                    : 'https://via.placeholder.com/500x500?text=No+Image'}
                                 alt={product?.name || 'Product'}
                                 sx={{ objectFit: 'contain', bgcolor: 'grey.50' }}
                             />

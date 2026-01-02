@@ -84,8 +84,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<?> handleGlobalException(Throwable ex, WebRequest request) {
+        // Log the full stack trace
+        ex.printStackTrace();
+        
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
