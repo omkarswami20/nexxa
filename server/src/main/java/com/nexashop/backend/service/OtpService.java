@@ -21,6 +21,9 @@ public class OtpService {
     private final EmailService emailService;
     private final Random random = new Random();
     
+    @Value("${app.sms.enabled:true}")
+    private boolean smsEnabled;
+    
     @Value("${app.sms.api.key:}")
     private String smsApiKey;
     
@@ -33,8 +36,10 @@ public class OtpService {
     }
 
     private void sendSms(String mobile, String otp) {
-        if (smsApiKey == null || smsApiKey.trim().isEmpty()) {
-            // Log warning but don't fail - SMS is optional in development
+        if (!smsEnabled || smsApiKey == null || smsApiKey.trim().isEmpty()) {
+            logger.info("SMS disabled or no API key confi
+            
+            gured: OTP for {}: {}", mobile, otp);
             return;
         }
 
@@ -47,10 +52,11 @@ public class OtpService {
             org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
             
             new RestTemplate().exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+            logger.info("SMS sent successfully to: {}", mobile);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
-            // SMS API key invalid - log but don't fail
+            logger.warn("SMS API key invalid for mobile: {}", mobile);
         } catch (Exception e) {
-            // Failed to send SMS - log but don't fail
+            logger.error("Failed to send SMS to {}: {}", mobile, e.getMessage());
         }
     }
 

@@ -67,6 +67,26 @@ public class OrderService {
             addressJson = serializeAddress(addr);
         } else if (inlineAddress != null && !inlineAddress.isEmpty()) {
             try {
+                // Auto-save new address to profile
+                CustomerAddress newAddr = new CustomerAddress();
+                newAddr.setCustomerId(customerId);
+                newAddr.setName((String) inlineAddress.get("name"));
+                newAddr.setPhone((String) inlineAddress.get("phone"));
+                newAddr.setLine1((String) inlineAddress.get("line1"));
+                newAddr.setLine2((String) inlineAddress.get("line2"));
+                newAddr.setCity((String) inlineAddress.get("city"));
+                newAddr.setState((String) inlineAddress.get("state"));
+                newAddr.setZip((String) inlineAddress.get("zip"));
+                newAddr.setCountry((String) inlineAddress.get("country"));
+                
+                // If it's the first address, make it default
+                long count = customerAddressRepository.findByCustomerId(customerId).size();
+                if (count == 0) {
+                    newAddr.setDefault(true);
+                }
+                
+                customerAddressRepository.save(newAddr);
+
                 addressJson = objectMapper.writeValueAsString(inlineAddress);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Invalid address data");

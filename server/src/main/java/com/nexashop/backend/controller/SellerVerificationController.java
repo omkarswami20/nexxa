@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/v1/sellers", "/api/v1/seller"})
+@RequestMapping({"/api/v1/sellers", "/api/v1/seller", "/api/sellers", "/api/seller"})
 public class SellerVerificationController {
 
     private static final Logger logger = LoggerFactory.getLogger(SellerVerificationController.class);

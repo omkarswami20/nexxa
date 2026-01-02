@@ -61,7 +61,6 @@ public class CustomerService {
         }
         Customer saved = customerRepository.save(c);
         // Trigger OTPs (2 minutes each)
-        // Trigger OTPs (2 minutes each)
         otpService.sendOtpWithContext(saved.getEmail(), "CUSTOMER_EMAIL", 120);
         if (saved.getMobile() != null && !saved.getMobile().isBlank()) {
             otpService.sendOtpWithContext(saved.getMobile(), "CUSTOMER_MOBILE", 120);

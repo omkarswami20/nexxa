@@ -130,7 +130,7 @@ const AdminDashboardView = ({
                                             </TableCell>
                                             <TableCell align="right" sx={{ py: 2.5 }}>
                                                 {/* Actions for Pending Sellers */}
-                                                {seller.status === 'PENDING_ADMIN_APPROVAL' && (
+                                                {(seller.status === 'PENDING_ADMIN_APPROVAL' || seller.status === 'PENDING') && (
                                                     <>
                                                         <Button
                                                             startIcon={<CheckCircleIcon />}
