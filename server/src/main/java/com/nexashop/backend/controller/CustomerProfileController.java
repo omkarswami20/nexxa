@@ -12,7 +12,7 @@ import java.security.Principal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping({"/api/v1/customers", "/api/customers"})
 public class CustomerProfileController {
 
     private final CustomerService customerService;

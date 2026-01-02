@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping({"/api/v1/auth", "/api/auth"})
 public class AuthController {
     private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
     private final com.nexashop.backend.security.JwtUtils jwtUtils;
