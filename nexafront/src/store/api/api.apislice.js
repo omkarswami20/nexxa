@@ -345,11 +345,20 @@ export const api = createApi({
 
         // Checkout
         checkout: builder.mutation({
-            query: ({ addressId, address }) => ({
-                url: '/checkout',
-                method: 'POST',
-                body: { addressId, address },
-            }),
+            query: ({ addressId, address }) => {
+                const body = {};
+                if (addressId != null) {
+                    body.addressId = addressId;
+                }
+                if (address != null) {
+                    body.address = address;
+                }
+                return {
+                    url: '/checkout',
+                    method: 'POST',
+                    body,
+                };
+            },
             invalidatesTags: [{ type: 'CartItem', id: 'LIST' }, { type: 'Order', id: 'LIST' }, 'Address'],
         }),
 

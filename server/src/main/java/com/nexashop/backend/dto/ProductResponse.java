@@ -72,3 +72,4 @@ public class ProductResponse {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
 
+
