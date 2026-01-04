@@ -64,14 +64,14 @@ const CheckoutContainer = () => {
     }
 
     if (useNewAddress) {
-      const { name, line1, city, state, zip, country } = newAddress;
+      const { name, line1, city, state, zip, country } = newAddress || {};
       if (
-        !name.trim() ||
-        !line1.trim() ||
-        !city.trim() ||
-        !state.trim() ||
-        !zip.trim() ||
-        !country.trim()
+        !name?.trim() ||
+        !line1?.trim() ||
+        !city?.trim() ||
+        !state?.trim() ||
+        !zip?.trim() ||
+        !country?.trim()
       ) {
         setValidationError("Please fill in all required address fields.");
         return;
@@ -80,20 +80,42 @@ const CheckoutContainer = () => {
 
     try {
       const payload = useNewAddress
-        ? { address: newAddress }
-        : { addressId: parseInt(selectedAddressId) };
+        ? { 
+            address: {
+              name: newAddress?.name?.trim() || "",
+              phone: newAddress?.phone?.trim() || "",
+              line1: newAddress?.line1?.trim() || "",
+              line2: newAddress?.line2?.trim() || "",
+              city: newAddress?.city?.trim() || "",
+              state: newAddress?.state?.trim() || "",
+              zip: newAddress?.zip?.trim() || "",
+              country: newAddress?.country?.trim() || "",
+            }
+          }
+        : { 
+            addressId: selectedAddressId ? parseInt(selectedAddressId, 10) : null 
+          };
 
       const res = await checkout(payload).unwrap();
-      navigate(`/orders/${res.id}`);
+      if (res?.id) {
+        navigate(`/orders/${res.id}`);
+      } else {
+        setValidationError("Order created but invalid response received.");
+      }
     } catch (err) {
       console.error("Checkout failed:", err);
+      const errorMessage = err?.data?.message || 
+                          err?.data?.error || 
+                          err?.message || 
+                          "Checkout failed. Please try again.";
+      setValidationError(errorMessage);
     }
   };
 
-  const totalAmount = items.reduce((sum, item) => {
-    const product = item.product;
-    if (product && product.price) {
-      return sum + parseFloat(product.price) * (item.quantity || 0);
+  const totalAmount = (items || []).reduce((sum, item) => {
+    const product = item?.product;
+    if (product?.price) {
+      return sum + parseFloat(product.price) * (item?.quantity || 0);
     }
     return sum;
   }, 0);

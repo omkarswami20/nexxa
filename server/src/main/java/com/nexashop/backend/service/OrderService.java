@@ -18,6 +18,8 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final SellerRepository sellerRepository;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public OrderService(CustomerRepository customerRepository,
@@ -25,13 +27,17 @@ public class OrderService {
                         CartItemRepository cartItemRepository,
                         ProductRepository productRepository,
                         OrderRepository orderRepository,
-                        OrderItemRepository orderItemRepository) {
+                        OrderItemRepository orderItemRepository,
+                        SellerRepository sellerRepository,
+                        EmailService emailService) {
         this.customerRepository = customerRepository;
         this.customerAddressRepository = customerAddressRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.sellerRepository = sellerRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -67,17 +73,34 @@ public class OrderService {
             addressJson = serializeAddress(addr);
         } else if (inlineAddress != null && !inlineAddress.isEmpty()) {
             try {
+                // Validate required address fields
+                String name = (String) inlineAddress.get("name");
+                String line1 = (String) inlineAddress.get("line1");
+                String city = (String) inlineAddress.get("city");
+                String state = (String) inlineAddress.get("state");
+                String zip = (String) inlineAddress.get("zip");
+                String country = (String) inlineAddress.get("country");
+                
+                if (name == null || name.trim().isEmpty() ||
+                    line1 == null || line1.trim().isEmpty() ||
+                    city == null || city.trim().isEmpty() ||
+                    state == null || state.trim().isEmpty() ||
+                    zip == null || zip.trim().isEmpty() ||
+                    country == null || country.trim().isEmpty()) {
+                    throw new IllegalArgumentException("All required address fields must be provided");
+                }
+                
                 // Auto-save new address to profile
                 CustomerAddress newAddr = new CustomerAddress();
                 newAddr.setCustomerId(customerId);
-                newAddr.setName((String) inlineAddress.get("name"));
-                newAddr.setPhone((String) inlineAddress.get("phone"));
-                newAddr.setLine1((String) inlineAddress.get("line1"));
-                newAddr.setLine2((String) inlineAddress.get("line2"));
-                newAddr.setCity((String) inlineAddress.get("city"));
-                newAddr.setState((String) inlineAddress.get("state"));
-                newAddr.setZip((String) inlineAddress.get("zip"));
-                newAddr.setCountry((String) inlineAddress.get("country"));
+                newAddr.setName(name.trim());
+                newAddr.setPhone(inlineAddress.get("phone") != null ? ((String) inlineAddress.get("phone")).trim() : null);
+                newAddr.setLine1(line1.trim());
+                newAddr.setLine2(inlineAddress.get("line2") != null ? ((String) inlineAddress.get("line2")).trim() : null);
+                newAddr.setCity(city.trim());
+                newAddr.setState(state.trim());
+                newAddr.setZip(zip.trim());
+                newAddr.setCountry(country.trim());
                 
                 // If it's the first address, make it default
                 long count = customerAddressRepository.findByCustomerId(customerId).size();
@@ -89,10 +112,10 @@ public class OrderService {
 
                 addressJson = objectMapper.writeValueAsString(inlineAddress);
             } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Invalid address data");
+                throw new IllegalArgumentException("Invalid address data: " + e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Address is required");
+            throw new IllegalArgumentException("Address is required. Please provide either addressId or address details.");
         }
 
         // Compute total and create order
@@ -129,6 +152,81 @@ public class OrderService {
 
         // Clear cart
         cartItemRepository.deleteByCustomerId(customerId);
+
+        // Send email notifications asynchronously (don't block transaction)
+        // Move email sending outside transaction to avoid issues
+        try {
+            // Get order items for email (after transaction commits)
+            List<OrderItem> savedOrderItems = orderItemRepository.findByOrderId(savedOrder.getId());
+            
+            if (savedOrderItems != null && !savedOrderItems.isEmpty()) {
+                // Send order confirmation email to customer
+                if (customer != null && customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+                    try {
+                        emailService.sendOrderConfirmationEmail(
+                            customer.getEmail(),
+                            customer.getName() != null && !customer.getName().trim().isEmpty() 
+                                ? customer.getName() : "Customer",
+                            savedOrder,
+                            savedOrderItems
+                        );
+                    } catch (Exception e) {
+                        org.slf4j.LoggerFactory.getLogger(OrderService.class)
+                            .warn("Failed to send order confirmation email: {}", e.getMessage());
+                    }
+                }
+
+                // Send new order notifications to sellers (grouped by seller)
+                Map<Long, List<OrderItem>> itemsBySeller = new HashMap<>();
+                for (OrderItem item : savedOrderItems) {
+                    if (item != null && item.getSellerId() != null) {
+                        itemsBySeller.computeIfAbsent(item.getSellerId(), k -> new ArrayList<>()).add(item);
+                    }
+                }
+
+                for (Map.Entry<Long, List<OrderItem>> entry : itemsBySeller.entrySet()) {
+                    Long sellerId = entry.getKey();
+                    List<OrderItem> sellerItems = entry.getValue();
+                    
+                    if (sellerId != null && sellerItems != null && !sellerItems.isEmpty()) {
+                        try {
+                            sellerRepository.findById(sellerId).ifPresent(seller -> {
+                                if (seller != null && seller.getEmail() != null && !seller.getEmail().trim().isEmpty()) {
+                                    for (OrderItem item : sellerItems) {
+                                        if (item != null) {
+                                            try {
+                                                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                                                Integer remainingStock = product != null ? product.getStockQuantity() : null;
+                                                
+                                                emailService.sendNewOrderNotificationToSeller(
+                                                    seller.getEmail(),
+                                                    seller.getName() != null && !seller.getName().trim().isEmpty()
+                                                        ? seller.getName() : "Seller",
+                                                    item,
+                                                    savedOrder,
+                                                    remainingStock
+                                                );
+                                            } catch (Exception e) {
+                                                org.slf4j.LoggerFactory.getLogger(OrderService.class)
+                                                    .warn("Failed to send seller notification for item {}: {}", 
+                                                        item.getId(), e.getMessage());
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            org.slf4j.LoggerFactory.getLogger(OrderService.class)
+                                .warn("Failed to process seller notifications for seller {}: {}", sellerId, e.getMessage());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the order creation
+            org.slf4j.LoggerFactory.getLogger(OrderService.class)
+                .error("Failed to send order notification emails: {}", e.getMessage(), e);
+        }
 
         return savedOrder;
     }
@@ -181,7 +279,52 @@ public class OrderService {
         if (!Objects.equals(oi.getSellerId(), sellerId)) {
             throw new IllegalArgumentException("Order item not found");
         }
+        
+        OrderItem.Status oldStatus = oi.getStatus();
         oi.setStatus(status);
-        return orderItemRepository.save(oi);
+        OrderItem savedItem = orderItemRepository.save(oi);
+
+        // Send email notifications based on status change
+        try {
+            Order order = orderRepository.findById(oi.getOrderId()).orElse(null);
+            Customer customer = order != null ? customerRepository.findById(order.getCustomerId()).orElse(null) : null;
+            Seller seller = sellerRepository.findById(sellerId).orElse(null);
+
+            // Send status change notification to seller
+            if (seller != null && seller.getEmail() != null) {
+                emailService.sendOrderStatusChangeToSeller(
+                    seller.getEmail(),
+                    seller.getName() != null ? seller.getName() : "Seller",
+                    savedItem,
+                    oldStatus,
+                    status
+                );
+            }
+
+            // Send shipment/delivery notifications to customer
+            if (customer != null && customer.getEmail() != null && order != null) {
+                if (status == OrderItem.Status.SHIPPED) {
+                    emailService.sendOrderShippedEmail(
+                        customer.getEmail(),
+                        customer.getName() != null ? customer.getName() : "Customer",
+                        order,
+                        savedItem
+                    );
+                } else if (status == OrderItem.Status.DELIVERED) {
+                    emailService.sendOrderDeliveredEmail(
+                        customer.getEmail(),
+                        customer.getName() != null ? customer.getName() : "Customer",
+                        order,
+                        savedItem
+                    );
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the status update
+            org.slf4j.LoggerFactory.getLogger(OrderService.class)
+                .error("Failed to send status change notification emails: {}", e.getMessage(), e);
+        }
+
+        return savedItem;
     }
 }

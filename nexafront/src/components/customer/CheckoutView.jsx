@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Container,
@@ -12,14 +12,17 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-  FormLabel,
   Divider,
-  Card,
-  CardContent,
-  CardMedia,
+  Stepper,
+  Step,
+  StepLabel,
   CircularProgress,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { motion } from "framer-motion";
+
+const MotionBox = motion(Box);
+const MotionButton = motion(Button);
 
 const CheckoutView = ({
   items,
@@ -36,18 +39,57 @@ const CheckoutView = ({
   validationError,
   totalAmount,
 }) => {
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateField = (name, value) => {
+    if (!value || value.trim() === "") {
+      setFieldErrors((prev) => ({ ...prev, [name]: "This field is required" }));
+      return false;
+    }
+    setFieldErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[name];
+      return newErrors;
+    });
+    return true;
+  };
+
+  const handleFieldChange = (name, value) => {
+    onNewAddressChange(name, value);
+    if (fieldErrors[name]) {
+      validateField(name, value);
+    }
+  };
+
+  const steps = ["Cart", "Shipping", "Review"];
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" fontWeight="600" gutterBottom>
-        Check-out
+      <Typography variant="h4" component="h1" fontWeight="700" gutterBottom>
+        Checkout
       </Typography>
 
+      <Stepper activeStep={1} sx={{ mb: 4, mt: 3 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+
       {(isError || validationError) && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {validationError ||
-            error?.data?.message ||
-            "Checkout failed. Please try again."}
-        </Alert>
+        <MotionBox
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {validationError ||
+              error?.data?.message ||
+              error?.data?.error ||
+              error?.message ||
+              "Checkout failed. Please try again."}
+          </Alert>
+        </MotionBox>
       )}
 
       <Grid container spacing={4}>
@@ -68,10 +110,16 @@ const CheckoutView = ({
                 </Typography>
               </Box>
             ) : (
-              items.map((item) => {
+              items.map((item, index) => {
                 const product = item?.product;
                 return (
-                  <Box key={item?.id ?? `${item?.productId}`} sx={{ mb: 2 }}>
+                  <MotionBox
+                    key={item?.id ?? `${item?.productId}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    sx={{ mb: 2 }}
+                  >
                     <Box sx={{ display: "flex", gap: 2 }}>
                       {product?.imageUrl && (
                         <Box
@@ -83,26 +131,29 @@ const CheckoutView = ({
                           }
                           alt={product?.name || "Product"}
                           sx={{
-                            width: 60,
-                            height: 80,
+                            width: 80,
+                            height: 100,
                             objectFit: "cover",
-                            borderRadius: 0,
+                            borderRadius: 2,
+                            border: "1px solid",
+                            borderColor: "divider",
                           }}
                         />
                       )}
 
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="500">
+                        <Typography variant="subtitle1" fontWeight="600">
                           {product?.name || `Product #${item?.productId}`}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                           Quantity: {item?.quantity || 0} × Rs.{" "}
                           {(product?.price || 0).toFixed(2)}
                         </Typography>
                         <Typography
-                          variant="body2"
-                          fontWeight="500"
-                          sx={{ mt: 0.5 }}
+                          variant="body1"
+                          fontWeight="600"
+                          color="primary"
+                          sx={{ mt: 1 }}
                         >
                           Subtotal: Rs.{" "}
                           {(
@@ -114,7 +165,7 @@ const CheckoutView = ({
                     {items.indexOf(item) < items.length - 1 && (
                       <Divider sx={{ mt: 2 }} />
                     )}
-                  </Box>
+                  </MotionBox>
                 );
               })
             )}
@@ -191,9 +242,10 @@ const CheckoutView = ({
                       label="Name"
                       name="name"
                       value={newAddress.name}
-                      onChange={(e) =>
-                        onNewAddressChange("name", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("name", e.target.value)}
+                      onBlur={(e) => validateField("name", e.target.value)}
+                      error={!!fieldErrors.name}
+                      helperText={fieldErrors.name}
                       required
                     />
                   </Grid>
@@ -204,9 +256,7 @@ const CheckoutView = ({
                       label="Phone"
                       name="phone"
                       value={newAddress.phone}
-                      onChange={(e) =>
-                        onNewAddressChange("phone", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("phone", e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -216,9 +266,10 @@ const CheckoutView = ({
                       label="Address Line 1"
                       name="line1"
                       value={newAddress.line1}
-                      onChange={(e) =>
-                        onNewAddressChange("line1", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("line1", e.target.value)}
+                      onBlur={(e) => validateField("line1", e.target.value)}
+                      error={!!fieldErrors.line1}
+                      helperText={fieldErrors.line1}
                       required
                     />
                   </Grid>
@@ -229,9 +280,7 @@ const CheckoutView = ({
                       label="Address Line 2"
                       name="line2"
                       value={newAddress.line2}
-                      onChange={(e) =>
-                        onNewAddressChange("line2", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("line2", e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -241,9 +290,10 @@ const CheckoutView = ({
                       label="City"
                       name="city"
                       value={newAddress.city}
-                      onChange={(e) =>
-                        onNewAddressChange("city", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("city", e.target.value)}
+                      onBlur={(e) => validateField("city", e.target.value)}
+                      error={!!fieldErrors.city}
+                      helperText={fieldErrors.city}
                       required
                     />
                   </Grid>
@@ -254,9 +304,10 @@ const CheckoutView = ({
                       label="State"
                       name="state"
                       value={newAddress.state}
-                      onChange={(e) =>
-                        onNewAddressChange("state", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("state", e.target.value)}
+                      onBlur={(e) => validateField("state", e.target.value)}
+                      error={!!fieldErrors.state}
+                      helperText={fieldErrors.state}
                       required
                     />
                   </Grid>
@@ -267,9 +318,10 @@ const CheckoutView = ({
                       label="ZIP Code"
                       name="zip"
                       value={newAddress.zip}
-                      onChange={(e) =>
-                        onNewAddressChange("zip", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("zip", e.target.value)}
+                      onBlur={(e) => validateField("zip", e.target.value)}
+                      error={!!fieldErrors.zip}
+                      helperText={fieldErrors.zip}
                       required
                     />
                   </Grid>
@@ -280,9 +332,10 @@ const CheckoutView = ({
                       label="Country"
                       name="country"
                       value={newAddress.country}
-                      onChange={(e) =>
-                        onNewAddressChange("country", e.target.value)
-                      }
+                      onChange={(e) => handleFieldChange("country", e.target.value)}
+                      onBlur={(e) => validateField("country", e.target.value)}
+                      error={!!fieldErrors.country}
+                      helperText={fieldErrors.country}
                       required
                     />
                   </Grid>
@@ -318,13 +371,15 @@ const CheckoutView = ({
                 Rs. {totalAmount.toFixed(2)}
               </Typography>
             </Box>
-            <Button
+            <MotionButton
               variant="contained"
               fullWidth
               size="large"
               onClick={onPlaceOrder}
               disabled={isLoading || items.length === 0}
               sx={{ py: 1.5 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {isLoading ? (
                 <>
@@ -334,7 +389,7 @@ const CheckoutView = ({
               ) : (
                 "Place Order"
               )}
-            </Button>
+            </MotionButton>
             {items.length === 0 && (
               <Typography
                 variant="caption"
