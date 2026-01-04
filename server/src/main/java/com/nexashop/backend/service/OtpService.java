@@ -37,9 +37,7 @@ public class OtpService {
 
     private void sendSms(String mobile, String otp) {
         if (!smsEnabled || smsApiKey == null || smsApiKey.trim().isEmpty()) {
-            logger.info("SMS disabled or no API key confi
-            
-            gured: OTP for {}: {}", mobile, otp);
+            logger.info("SMS disabled or no API key configured: OTP for {}: {}", mobile, otp);
             return;
         }
 
