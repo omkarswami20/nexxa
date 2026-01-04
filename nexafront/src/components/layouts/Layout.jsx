@@ -1,17 +1,39 @@
-import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box, Container, IconButton, Menu, MenuItem, Divider } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, Box, Container, IconButton, Menu, MenuItem, Divider, Badge, useScrollTrigger, Slide } from '@mui/material';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCurrentToken, selectCurrentRole, logout } from '../../store/slices/auth.slice';
+import { useGetCartQuery } from '../../store/api/api.apislice';
+import MobileMenu from '../common/MobileMenu';
+import { motion } from 'framer-motion';
 
 const Layout = () => {
     const token = useSelector(selectCurrentToken);
     const role = useSelector(selectCurrentRole);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const location = useLocation();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    
+    const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !token || role !== 'customer' });
+    const cartItemCount = (cartItems || []).reduce((sum, item) => sum + (item?.quantity || 0), 0);
+    
+    const isActiveRoute = (path) => {
+        return location.pathname === path || location.pathname.startsWith(path + '/');
+    };
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 10);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -29,17 +51,28 @@ const Layout = () => {
 
     return (
         <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-            <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <AppBar 
+                position="sticky" 
+                elevation={scrolled ? 4 : 0}
+                sx={{ 
+                    bgcolor: scrolled ? 'background.paper' : 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                }}
+            >
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ py: 1 }}>
+                        {/* Mobile Menu Button */}
                         <IconButton
-                            component={Link}
-                            to="/cart"
-                            color="inherit"
-                            sx={{ display: { xs: 'none', md: 'flex' }, mr: 1.5, color: 'primary.main' }}
+                            onClick={() => setMobileMenuOpen(true)}
+                            sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'text.primary' }}
                         >
-                            <ShoppingBagIcon />
+                            <MenuIcon />
                         </IconButton>
+
+                        {/* Logo */}
                         <Typography
                             variant="h6"
                             noWrap
@@ -47,18 +80,33 @@ const Layout = () => {
                             to="/"
                             sx={{
                                 mr: 2,
-                                display: { xs: 'none', md: 'flex' },
-                                fontWeight: 600,
+                                display: { xs: 'flex', md: 'flex' },
+                                fontWeight: 700,
                                 letterSpacing: '0.02em',
                                 color: 'text.primary',
                                 textDecoration: 'none',
-                                flexGrow: 1,
+                                flexGrow: { xs: 1, md: 0 },
+                                fontSize: { xs: '1rem', md: '1.25rem' },
                             }}
                         >
                             NEXASHOP
                         </Typography>
 
-                        <Box sx={{ display: 'flex', gap: 1.5 }}>
+                        {/* Cart Icon - Desktop */}
+                        {token && role === 'customer' && (
+                            <IconButton
+                                component={Link}
+                                to="/cart"
+                                color="inherit"
+                                sx={{ display: { xs: 'none', md: 'flex' }, mr: 1.5, color: 'primary.main' }}
+                            >
+                                <Badge badgeContent={cartItemCount} color="error">
+                                    <ShoppingBagIcon />
+                                </Badge>
+                            </IconButton>
+                        )}
+
+                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, ml: 'auto', alignItems: 'center' }}>
                             {!token ? (
                                 <>
                                     <Button
@@ -66,7 +114,8 @@ const Layout = () => {
                                         component={Link}
                                         to="/customer/login"
                                         sx={{
-                                            color: 'text.primary',
+                                            color: isActiveRoute('/customer/login') ? 'primary.main' : 'text.primary',
+                                            fontWeight: isActiveRoute('/customer/login') ? 600 : 400,
                                             '&:hover': {
                                                 bgcolor: 'action.hover',
                                             }
@@ -79,7 +128,8 @@ const Layout = () => {
                                         component={Link}
                                         to="/customer/register"
                                         sx={{
-                                            color: 'text.primary',
+                                            color: isActiveRoute('/customer/register') ? 'primary.main' : 'text.primary',
+                                            fontWeight: isActiveRoute('/customer/register') ? 600 : 400,
                                             '&:hover': {
                                                 bgcolor: 'action.hover',
                                             }
@@ -92,7 +142,8 @@ const Layout = () => {
                                         component={Link}
                                         to="/seller/login"
                                         sx={{
-                                            color: 'text.primary',
+                                            color: isActiveRoute('/seller/login') ? 'primary.main' : 'text.primary',
+                                            fontWeight: isActiveRoute('/seller/login') ? 600 : 400,
                                             '&:hover': {
                                                 bgcolor: 'action.hover',
                                             }
@@ -105,6 +156,9 @@ const Layout = () => {
                                         color="primary"
                                         component={Link}
                                         to="/admin/login"
+                                        sx={{
+                                            fontWeight: isActiveRoute('/admin/login') ? 600 : 400,
+                                        }}
                                     >
                                         Admin Portal
                                     </Button>
@@ -139,7 +193,7 @@ const Layout = () => {
                                         PaperProps={{
                                             sx: {
                                                 mt: 1.5,
-                                                minWidth: 160,
+                                                minWidth: 200,
                                                 border: '1px solid',
                                                 borderColor: 'divider',
                                             }
@@ -148,7 +202,9 @@ const Layout = () => {
                                         {role === 'customer' && [
                                             <MenuItem key="profile" onClick={() => { handleClose(); navigate('/customer/profile'); }}>My Profile</MenuItem>,
                                             <MenuItem key="orders" onClick={() => { handleClose(); navigate('/orders'); }}>My Orders</MenuItem>,
-                                            <MenuItem key="cart" onClick={() => { handleClose(); navigate('/cart'); }}>My Cart</MenuItem>,
+                                            <MenuItem key="cart" onClick={() => { handleClose(); navigate('/cart'); }}>
+                                                My Cart {cartItemCount > 0 && `(${cartItemCount})`}
+                                            </MenuItem>,
                                             <Divider key="divider" />
                                         ]}
                                         {role === 'seller' && (
@@ -166,8 +222,10 @@ const Layout = () => {
                 </Container>
             </AppBar>
 
+            <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+
             <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
-                <Container maxWidth="lg">
+                <Container maxWidth="xl">
                     <Outlet />
                 </Container>
             </Box>

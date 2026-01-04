@@ -14,11 +14,12 @@ import {
     TableHead,
     TableRow,
     IconButton,
-    CircularProgress,
     Alert,
     Chip,
     Pagination,
+    Skeleton,
 } from '@mui/material';
+import { motion } from 'framer-motion';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AddIcon from '@mui/icons-material/Add';
@@ -213,8 +214,17 @@ const SellerDashboardView = ({
                 </Box>
 
                 {isLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
-                        <CircularProgress />
+                    <Box sx={{ p: 4 }}>
+                        {[...Array(5)].map((_, i) => (
+                            <Box key={i} sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                <Skeleton variant="rectangular" width={56} height={56} />
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Skeleton variant="text" width="60%" height={32} />
+                                    <Skeleton variant="text" width="40%" height={24} />
+                                </Box>
+                                <Skeleton variant="rectangular" width={100} height={36} />
+                            </Box>
+                        ))}
                     </Box>
                 ) : error ? (
                     <Box sx={{ p: 4, textAlign: 'center' }}>

@@ -6,17 +6,25 @@ import {
     Typography,
     Button,
     IconButton,
-    Card,
-    CardMedia,
     Alert,
-    CircularProgress,
     Chip,
     Divider,
+    Breadcrumbs,
+    Paper,
+    Skeleton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import HomeIcon from '@mui/icons-material/Home';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import ImageGallery from '../common/ImageGallery';
+
+const MotionBox = motion(Box);
+const MotionButton = motion(Button);
 
 const ProductDetailView = ({
     product,
@@ -30,9 +38,20 @@ const ProductDetailView = ({
 }) => {
     if (isLoading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-                <CircularProgress />
-            </Box>
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+                <Grid container spacing={4}>
+                    <Grid item xs={12} md={6}>
+                        <Skeleton variant="rectangular" height={500} sx={{ borderRadius: 3 }} />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Skeleton variant="text" width="60%" height={40} sx={{ mb: 2 }} />
+                        <Skeleton variant="text" width="40%" height={32} sx={{ mb: 3 }} />
+                        <Skeleton variant="text" width="100%" height={24} sx={{ mb: 1 }} />
+                        <Skeleton variant="text" width="90%" height={24} sx={{ mb: 3 }} />
+                        <Skeleton variant="rectangular" width="100%" height={48} sx={{ borderRadius: 2 }} />
+                    </Grid>
+                </Grid>
+            </Container>
         );
     }
 
@@ -52,71 +71,119 @@ const ProductDetailView = ({
     const isOutOfStock = (product?.stockQuantity || 0) === 0;
 
     return (
-        <Box sx={{ minHeight: 'calc(100vh - 200px)', py: 4 }}>
+        <Box sx={{ minHeight: 'calc(100vh - 200px)', py: 4, bgcolor: 'background.default' }}>
             <Container maxWidth="lg">
-                <Button component={Link} to="/" sx={{ mb: 3 }}>
-                    ← Back to Products
-                </Button>
+                {/* Breadcrumbs */}
+                <Breadcrumbs sx={{ mb: 4 }}>
+                    <Button
+                        component={Link}
+                        to="/"
+                        startIcon={<HomeIcon />}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Home
+                    </Button>
+                    {product?.category && (
+                        <Chip
+                            label={product.category.name}
+                            size="small"
+                            component={Link}
+                            to={`/?category=${product.category.name}`}
+                            clickable
+                        />
+                    )}
+                    <Typography color="text.secondary">{product?.name}</Typography>
+                </Breadcrumbs>
 
                 <Grid container spacing={4}>
                     {/* Product Image */}
                     <Grid item xs={12} md={6}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="500"
-                                image={product?.imageUrl 
-                                    ? (product.imageUrl.startsWith('http') ? product.imageUrl : `http://localhost:8080/uploads/products/${product.imageUrl}`) 
-                                    : 'https://via.placeholder.com/500x500?text=No+Image'}
-                                alt={product?.name || 'Product'}
-                                sx={{ objectFit: 'contain', bgcolor: 'grey.50' }}
+                        <MotionBox
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <ImageGallery
+                                imageUrl={product?.imageUrl}
+                                productName={product?.name}
                             />
-                        </Card>
+                        </MotionBox>
                     </Grid>
 
                     {/* Product Details */}
                     <Grid item xs={12} md={6}>
-                        <Box>
-                            {product?.category && (
-                                <Chip
-                                    label={product.category.name}
-                                    size="small"
-                                    sx={{ mb: 2 }}
-                                />
-                            )}
-                            <Typography variant="h4" component="h1" fontWeight="600" gutterBottom>
-                                {product?.name || 'Unknown Product'}
-                            </Typography>
-
-                            <Typography
-                                variant="h5"
-                                color="primary"
-                                fontWeight="600"
-                                sx={{ mb: 3 }}
+                        <MotionBox
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 4,
+                                    borderRadius: 3,
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                }}
                             >
-                                Rs. {product?.price?.toFixed(2) || '0.00'}
-                            </Typography>
-
-                            <Divider sx={{ my: 3 }} />
-
-                            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                                {product?.description || 'No description available'}
-                            </Typography>
-
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle2" gutterBottom>
-                                    Stock Status:
+                                {product?.category && (
+                                    <Chip
+                                        label={product.category.name}
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                    />
+                                )}
+                                <Typography variant="h4" component="h1" fontWeight="700" gutterBottom>
+                                    {product?.name || 'Unknown Product'}
                                 </Typography>
+
                                 <Typography
-                                    variant="body1"
-                                    color={isOutOfStock ? 'error.main' : 'success.main'}
-                                    fontWeight="500"
+                                    variant="h4"
+                                    color="primary"
+                                    fontWeight="700"
+                                    sx={{ mb: 3 }}
                                 >
-                                    {isOutOfStock
-                                        ? 'Out of Stock'
-                                        : `${product?.stockQuantity || 0} items available`}
+                                    Rs. {product?.price?.toFixed(2) || '0.00'}
                                 </Typography>
-                            </Box>
+
+                                <Divider sx={{ my: 3 }} />
+
+                                <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.8 }}>
+                                    {product?.description || 'No description available'}
+                                </Typography>
+
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        mb: 3,
+                                        bgcolor: isOutOfStock ? 'error.light' : 'success.light',
+                                        borderRadius: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                    }}
+                                >
+                                    <InventoryIcon
+                                        sx={{
+                                            color: isOutOfStock ? 'error.main' : 'success.main',
+                                        }}
+                                    />
+                                    <Box>
+                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                            Stock Status
+                                        </Typography>
+                                        <Typography
+                                            variant="body1"
+                                            color={isOutOfStock ? 'error.main' : 'success.main'}
+                                            fontWeight="600"
+                                        >
+                                            {isOutOfStock
+                                                ? 'Out of Stock'
+                                                : `${product?.stockQuantity || 0} items available`}
+                                        </Typography>
+                                    </Box>
+                                </Paper>
 
                             {addToCartError && (
                                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -124,45 +191,80 @@ const ProductDetailView = ({
                                 </Alert>
                             )}
 
-                            {!isOutOfStock && (
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        Quantity:
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <IconButton
-                                            onClick={() => onQuantityChange(quantity - 1)}
-                                            disabled={quantity <= 1}
-                                            size="small"
-                                        >
-                                            <RemoveIcon />
-                                        </IconButton>
-                                        <Typography variant="h6" sx={{ minWidth: 40, textAlign: 'center' }}>
-                                            {quantity}
+                                {!isOutOfStock && (
+                                    <Box sx={{ mb: 3 }}>
+                                        <Typography variant="subtitle2" gutterBottom sx={{ mb: 1.5 }}>
+                                            Quantity:
                                         </Typography>
-                                        <IconButton
-                                            onClick={() => onQuantityChange(quantity + 1)}
-                                            disabled={quantity >= (product?.stockQuantity || 0)}
-                                            size="small"
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 2,
+                                                p: 1,
+                                                border: '1px solid',
+                                                borderColor: 'divider',
+                                                borderRadius: 2,
+                                            }}
                                         >
-                                            <AddIcon />
-                                        </IconButton>
+                                            <IconButton
+                                                onClick={() => onQuantityChange(quantity - 1)}
+                                                disabled={quantity <= 1}
+                                                size="small"
+                                                sx={{
+                                                    transition: 'all 0.2s ease',
+                                                    '&:hover': {
+                                                        bgcolor: 'action.hover',
+                                                        transform: 'scale(1.1)',
+                                                    },
+                                                }}
+                                            >
+                                                <RemoveIcon />
+                                            </IconButton>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    minWidth: 50,
+                                                    textAlign: 'center',
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                {quantity}
+                                            </Typography>
+                                            <IconButton
+                                                onClick={() => onQuantityChange(quantity + 1)}
+                                                disabled={quantity >= (product?.stockQuantity || 0)}
+                                                size="small"
+                                                sx={{
+                                                    transition: 'all 0.2s ease',
+                                                    '&:hover': {
+                                                        bgcolor: 'action.hover',
+                                                        transform: 'scale(1.1)',
+                                                    },
+                                                }}
+                                            >
+                                                <AddIcon />
+                                            </IconButton>
+                                        </Paper>
                                     </Box>
-                                </Box>
-                            )}
+                                )}
 
-                            <Button
-                                variant="contained"
-                                size="large"
-                                startIcon={<ShoppingCartIcon />}
-                                onClick={onAddToCart}
-                                disabled={isOutOfStock || isAddingToCart}
-                                fullWidth
-                                sx={{ py: 1.5 }}
-                            >
-                                {isAddingToCart ? 'Adding to Cart...' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                            </Button>
-                        </Box>
+                                <MotionButton
+                                    variant="contained"
+                                    size="large"
+                                    startIcon={<ShoppingCartIcon />}
+                                    onClick={onAddToCart}
+                                    disabled={isOutOfStock || isAddingToCart}
+                                    fullWidth
+                                    sx={{ py: 1.5 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    {isAddingToCart ? 'Adding to Cart...' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                                </MotionButton>
+                            </Paper>
+                        </MotionBox>
                     </Grid>
                 </Grid>
             </Container>

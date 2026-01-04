@@ -10,15 +10,19 @@ import {
   CardContent,
   CardMedia,
   Grid,
-  CircularProgress,
   Alert,
   Paper,
+  Skeleton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+
+const MotionCard = motion(Card);
+const MotionBox = motion(Box);
 
 const CartView = ({
   items,
@@ -33,9 +37,37 @@ const CartView = ({
   if (isLoading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <Skeleton variant="text" width={200} height={40} sx={{ mb: 3 }} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8}>
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={3}>
+                      <Skeleton variant="rectangular" height={120} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Skeleton variant="text" width="80%" height={32} />
+                      <Skeleton variant="text" width="60%" height={24} />
+                      <Skeleton variant="text" width="40%" height={24} />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Skeleton variant="rectangular" width="100%" height={40} />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            ))}
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3 }}>
+              <Skeleton variant="text" width="60%" height={32} />
+              <Skeleton variant="text" width="100%" height={24} sx={{ mt: 2 }} />
+              <Skeleton variant="rectangular" width="100%" height={48} sx={{ mt: 2 }} />
+            </Paper>
+          </Grid>
+        </Grid>
       </Container>
     );
   }
@@ -47,9 +79,13 @@ const CartView = ({
       </Typography>
 
       {items.length === 0 ? (
-        <Box sx={{ textAlign: "center", py: 8 }}>
+        <MotionBox
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          sx={{ textAlign: "center", py: 8 }}
+        >
           <ShoppingCartIcon
-            sx={{ fontSize: 80, color: "text.secondary", mb: 2 }}
+            sx={{ fontSize: 80, color: "text.secondary", mb: 2, opacity: 0.5 }}
           />
           <Typography variant="h6" color="text.secondary" gutterBottom>
             Your cart is empty
@@ -57,20 +93,25 @@ const CartView = ({
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Start shopping to add items to your cart
           </Typography>
-          <Button component={Link} to="/" variant="contained">
+          <Button component={Link} to="/" variant="contained" size="large">
             Continue Shopping
           </Button>
-        </Box>
+        </MotionBox>
       ) : (
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            {items.map((item) => {
-              const product = item?.product;
-              return (
-                <Card
-                  key={item?.id ?? `cart-item-${item.productId}`}
-                  sx={{ mb: 2 }}
-                >
+            <AnimatePresence>
+              {items.map((item, index) => {
+                const product = item?.product;
+                return (
+                  <MotionCard
+                    key={item?.id ?? `cart-item-${item.productId}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    sx={{ mb: 2 }}
+                  >
                   <CardContent>
                     <Grid container spacing={2} alignItems="center">
                       {/* Product Image */}
@@ -128,13 +169,20 @@ const CartView = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            flexDirection: { xs: "row", sm: "column" },
+                            gap: 1,
                           }}
                         >
-                          <Box
+                          <Paper
+                            elevation={0}
                             sx={{
                               display: "flex",
                               alignItems: "center",
                               gap: 1,
+                              p: 0.5,
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: 2,
                             }}
                           >
                             <IconButton
@@ -143,12 +191,16 @@ const CartView = ({
                                 onDecrease(item.productId, item.quantity)
                               }
                               disabled={(item.quantity || 0) <= 1}
+                              sx={{
+                                transition: "all 0.2s ease",
+                                "&:hover": { transform: "scale(1.1)" },
+                              }}
                             >
                               <RemoveIcon />
                             </IconButton>
                             <Typography
                               variant="body1"
-                              sx={{ minWidth: 30, textAlign: "center" }}
+                              sx={{ minWidth: 30, textAlign: "center", fontWeight: 600 }}
                             >
                               {item.quantity || 0}
                             </Typography>
@@ -162,14 +214,22 @@ const CartView = ({
                                 (item.quantity || 0) >=
                                   (product.stockQuantity || 0)
                               }
+                              sx={{
+                                transition: "all 0.2s ease",
+                                "&:hover": { transform: "scale(1.1)" },
+                              }}
                             >
                               <AddIcon />
                             </IconButton>
-                          </Box>
+                          </Paper>
                           <IconButton
                             color="error"
                             onClick={() => onRemove(item.productId)}
                             size="small"
+                            sx={{
+                              transition: "all 0.2s ease",
+                              "&:hover": { transform: "scale(1.1)" },
+                            }}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -177,7 +237,7 @@ const CartView = ({
                         <Typography
                           variant="body2"
                           color="text.secondary"
-                          sx={{ mt: 1, textAlign: "center" }}
+                          sx={{ mt: 1, textAlign: "center", fontWeight: 600 }}
                         >
                           Subtotal: Rs.{" "}
                           {(
@@ -187,9 +247,10 @@ const CartView = ({
                       </Grid>
                     </Grid>
                   </CardContent>
-                </Card>
-              );
-            })}
+                </MotionCard>
+                );
+              })}
+            </AnimatePresence>
           </Grid>
 
           {/* Order Summary */}
@@ -218,15 +279,17 @@ const CartView = ({
                   Rs. {totalAmount.toFixed(2)}
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                onClick={onCheckout}
-                sx={{ py: 1.5 }}
-              >
-                Proceed to Checkout
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={onCheckout}
+                  sx={{ py: 1.5 }}
+                >
+                  Proceed to Checkout
+                </Button>
+              </motion.div>
             </Paper>
           </Grid>
         </Grid>
