@@ -98,10 +98,12 @@ public class CartService {
     public void removeItem(String customerEmail, Long productId) {
         Long customerId = customerRepository.findByEmail(customerEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found")).getId();
-        cartItemRepository.deleteByCustomerIdAndProductId(customerId, productId);
+        cartItemRepository.findByCustomerIdAndProductId(customerId, productId)
+                .ifPresent(cartItemRepository::delete);
     }
 
     public void clearCart(Long customerId) {
-        cartItemRepository.deleteByCustomerId(customerId);
+        List<CartItem> items = cartItemRepository.findByCustomerId(customerId);
+        cartItemRepository.deleteAll(items);
     }
 }

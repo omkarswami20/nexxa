@@ -42,14 +42,17 @@ public class OrderService {
 
     @Transactional
     public Order checkout(String customerEmail, Optional<Long> addressIdOpt, Map<String, Object> inlineAddress) {
+
         Customer customer = customerRepository.findByEmail(customerEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
         Long customerId = customer.getId();
+        System.out.println("Customer found: " + customerId);
 
         List<CartItem> cart = cartItemRepository.findByCustomerId(customerId);
         if (cart.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
         }
+        System.out.println("Cart size: " + cart.size());
 
         // Load products and validate stock
         Map<Long, Product> products = new HashMap<>();
@@ -61,10 +64,12 @@ public class OrderService {
             }
             products.put(p.getId(), p);
         }
+        System.out.println("Products loaded");
 
-        // Address snapshot JSON
+        // Address processing (retaining logic)
         String addressJson;
         if (addressIdOpt.isPresent()) {
+            System.out.println("Using existing address ID: " + addressIdOpt.get());
             var addr = customerAddressRepository.findById(addressIdOpt.get())
                     .orElseThrow(() -> new IllegalArgumentException("Address not found"));
             if (!Objects.equals(addr.getCustomerId(), customerId)) {
@@ -72,6 +77,8 @@ public class OrderService {
             }
             addressJson = serializeAddress(addr);
         } else if (inlineAddress != null && !inlineAddress.isEmpty()) {
+             System.out.println("Processing inline address");
+             // ... existing inline address logic ...
             try {
                 // Validate required address fields
                 String name = (String) inlineAddress.get("name");
@@ -108,6 +115,7 @@ public class OrderService {
                     newAddr.setDefault(true);
                 }
                 
+                System.out.println("Saving new address");
                 customerAddressRepository.save(newAddr);
 
                 addressJson = objectMapper.writeValueAsString(inlineAddress);
@@ -115,8 +123,9 @@ public class OrderService {
                 throw new IllegalArgumentException("Invalid address data: " + e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Address is required. Please provide either addressId or address details.");
+            throw new IllegalArgumentException("Address is required");
         }
+        System.out.println("Address processed");
 
         // Compute total and create order
         BigDecimal total = BigDecimal.ZERO;
@@ -124,16 +133,21 @@ public class OrderService {
             Product p = products.get(item.getProductId());
             total = total.add(p.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
+        System.out.println("Total calculated: " + total);
 
         Order order = new Order();
         order.setCustomerId(customerId);
         order.setAddressSnapshotJson(addressJson);
         order.setTotalAmount(total);
         order.setStatus(Order.Status.PLACED);
+        
+        System.out.println("Saving order...");
         Order savedOrder = orderRepository.save(order);
+        System.out.println("Order saved: " + savedOrder.getId());
 
         // Create order items and deduct stock
         for (CartItem item : cart) {
+            System.out.println("Processing item: " + item.getId());
             Product p = products.get(item.getProductId());
             OrderItem oi = new OrderItem();
             oi.setOrderId(savedOrder.getId());
@@ -141,7 +155,7 @@ public class OrderService {
             oi.setProductNameSnapshot(p.getName());
             oi.setUnitPrice(p.getPrice());
             oi.setQuantity(item.getQuantity());
-            oi.setSellerId(p.getSeller().getId());
+            oi.setSellerId(p.getSeller().getId()); // Potential NPE if seller is null
             oi.setStatus(OrderItem.Status.PLACED);
             orderItemRepository.save(oi);
 
@@ -149,9 +163,12 @@ public class OrderService {
             p.setStockQuantity(p.getStockQuantity() - item.getQuantity());
             productRepository.save(p);
         }
+        
+        System.out.println("Items processed. Clearing cart...");
 
         // Clear cart
-        cartItemRepository.deleteByCustomerId(customerId);
+        cartItemRepository.deleteAll(cart);
+        System.out.println("Cart cleared.");
 
         // Send email notifications asynchronously (don't block transaction)
         // Move email sending outside transaction to avoid issues

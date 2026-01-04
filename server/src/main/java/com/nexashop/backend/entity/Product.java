@@ -41,7 +41,7 @@ public class Product {
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private Seller seller;
 
-    @Version
+    // @Version
     private Long version;
 
     private LocalDateTime createdAt;
