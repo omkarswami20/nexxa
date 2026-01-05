@@ -61,11 +61,14 @@ public class SellerService {
 
         Seller savedSeller = sellerRepository.save(seller);
         // Send seller email verification link (24h TTL)
-        String token = verificationService.createToken("seller-email", savedSeller.getEmail(), java.time.Duration.ofHours(24));
+        String token = verificationService.createToken("seller-email", savedSeller.getEmail(),
+                java.time.Duration.ofHours(24));
         String link = System.getProperty("app.frontend.url", "http://localhost:5173") + "/seller/verify?token=" + token;
         emailService.sendSimpleEmail(savedSeller.getEmail(), "Verify your email - Nexashop",
-                "Dear " + savedSeller.getName() + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link + "\n\nBest Regards,\nNexashop Team");
-        
+                "Dear " + savedSeller.getName()
+                        + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link
+                        + "\n\nBest Regards,\nNexashop Team");
+
         // Trigger Mobile OTP (2 minutes TTL)
         if (savedSeller.getMobile() != null && !savedSeller.getMobile().isBlank()) {
             otpService.sendOtpWithContext(savedSeller.getMobile(), "SELLER", 120);
@@ -74,9 +77,11 @@ public class SellerService {
     }
 
     public boolean verifySellerEmail(String token) {
-        // Do not delete token immediately to allow idempotency (e.g., StrictMode double-fetch)
+        // Do not delete token immediately to allow idempotency (e.g., StrictMode
+        // double-fetch)
         String email = verificationService.consumeToken("seller-email", token, false);
-        if (email == null) return false;
+        if (email == null)
+            return false;
         return sellerRepository.findByEmail(email).map(s -> {
             s.setEmailVerified(true);
             // If both email and mobile are verified, set status to PENDING_ADMIN_APPROVAL
@@ -119,7 +124,8 @@ public class SellerService {
 
         // Check verification status
         boolean emailVerified = seller.isEmailVerified();
-        boolean mobileVerified = seller.getMobile() == null || seller.getMobile().isBlank() || seller.isMobileVerified();
+        boolean mobileVerified = seller.getMobile() == null || seller.getMobile().isBlank()
+                || seller.isMobileVerified();
         String accountStatus = seller.getStatus().name();
 
         // Check if account is denied
@@ -128,15 +134,23 @@ public class SellerService {
         }
 
         // Check if verification is incomplete or account is not active
+        // Check if verification is incomplete or account is not active
         if (!emailVerified || !mobileVerified || seller.getStatus() != Seller.SellerStatus.ACTIVE) {
+            // Auto-resend verification codes
+            if (!emailVerified) {
+                resendVerificationEmail(seller.getEmail());
+            }
+            if (!mobileVerified && seller.getMobile() != null && !seller.getMobile().isBlank()) {
+                sendSellerMobileOtp(seller.getMobile());
+            }
+
             throw new VerificationRequiredException(
-                "Please complete verification to login",
-                emailVerified,
-                mobileVerified,
-                accountStatus,
-                seller.getEmail(),
-                seller.getMobile() != null ? seller.getMobile() : ""
-            );
+                    "Please complete verification to login",
+                    emailVerified,
+                    mobileVerified,
+                    accountStatus,
+                    seller.getEmail(),
+                    seller.getMobile() != null ? seller.getMobile() : "");
         }
 
         String token = jwtUtils.generateToken(seller.getEmail(), "ROLE_SELLER");
@@ -162,5 +176,22 @@ public class SellerService {
         emailService.sendStatusNotification(updatedSeller, request.getRejectionReason());
 
         return updatedSeller;
+    }
+
+    public void resendVerificationEmail(String email) {
+        Seller seller = sellerRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
+
+        if (seller.isEmailVerified()) {
+            throw new IllegalArgumentException("Email is already verified");
+        }
+
+        String token = verificationService.createToken("seller-email", seller.getEmail(),
+                java.time.Duration.ofHours(24));
+        String link = System.getProperty("app.frontend.url", "http://localhost:5173") + "/seller/verify?token=" + token;
+        emailService.sendSimpleEmail(seller.getEmail(), "Verify your email - Nexashop",
+                "Dear " + seller.getName()
+                        + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link
+                        + "\n\nBest Regards,\nNexashop Team");
     }
 }

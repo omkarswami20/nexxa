@@ -10,7 +10,7 @@ export const transformAddressResponse = (response) => {
         state: response?.state || '',
         zip: response?.zip || '',
         country: response?.country || '',
-        isDefault: !!response?.default,
+        isDefault: !!(response?.default || response?.isDefault),
     };
 };
 

@@ -18,7 +18,7 @@ import com.nexashop.backend.security.JwtUtils;
 @Service
 @Transactional
 public class CustomerService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
@@ -29,11 +29,11 @@ public class CustomerService {
     private final EmailService emailService;
 
     public CustomerService(CustomerRepository customerRepository,
-                           PasswordEncoder passwordEncoder,
-                           JwtUtils jwtUtils,
-                           RefreshTokenService refreshTokenService,
-                           OtpService otpService,
-                           EmailService emailService) {
+            PasswordEncoder passwordEncoder,
+            JwtUtils jwtUtils,
+            RefreshTokenService refreshTokenService,
+            OtpService otpService,
+            EmailService emailService) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
@@ -46,7 +46,8 @@ public class CustomerService {
         if (customerRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-        if (req.getMobile() != null && !req.getMobile().isBlank() && customerRepository.existsByMobile(req.getMobile())) {
+        if (req.getMobile() != null && !req.getMobile().isBlank()
+                && customerRepository.existsByMobile(req.getMobile())) {
             throw new IllegalArgumentException("Mobile already exists");
         }
         Customer c = new Customer();
@@ -74,24 +75,34 @@ public class CustomerService {
         if (!passwordEncoder.matches(req.getPassword(), c.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
-        
+
         // Check verification status
         boolean emailVerified = c.isEmailVerified();
         boolean mobileVerified = c.getMobile() == null || c.getMobile().isBlank() || c.isMobileVerified();
         String accountStatus = c.getAccountStatus().name();
-        
-        // If verification is incomplete or account is not active, throw VerificationRequiredException
+
+        // If verification is incomplete or account is not active, throw
+        // VerificationRequiredException
+        // If verification is incomplete or account is not active, throw
+        // VerificationRequiredException
         if (!emailVerified || !mobileVerified || c.getAccountStatus() != Customer.AccountStatus.ACTIVE) {
+            // Auto-resend OTPs
+            if (!emailVerified) {
+                otpService.sendOtpWithContext(c.getEmail(), "CUSTOMER_EMAIL", 120);
+            }
+            if (!mobileVerified && c.getMobile() != null && !c.getMobile().isBlank()) {
+                otpService.sendOtpWithContext(c.getMobile(), "CUSTOMER_MOBILE", 120);
+            }
+
             throw new VerificationRequiredException(
-                "Please complete verification to login",
-                emailVerified,
-                mobileVerified,
-                accountStatus,
-                c.getEmail(),
-                c.getMobile() != null ? c.getMobile() : ""
-            );
+                    "Please complete verification to login",
+                    emailVerified,
+                    mobileVerified,
+                    accountStatus,
+                    c.getEmail(),
+                    c.getMobile() != null ? c.getMobile() : "");
         }
-        
+
         String token = jwtUtils.generateToken(c.getEmail(), "ROLE_CUSTOMER");
         var refresh = refreshTokenService.createRefreshToken(c.getEmail());
         return new LoginResponse(token, refresh.getToken());
@@ -147,44 +158,50 @@ public class CustomerService {
     }
 
     public Customer getProfile(String email) {
-        return customerRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        return customerRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
     }
 
     public Customer updateProfile(String email, String name, String mobile) {
-        Customer c = customerRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-        if (name != null && !name.isBlank()) c.setName(name);
-        if (mobile != null) c.setMobile(mobile);
+        Customer c = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        if (name != null && !name.isBlank())
+            c.setName(name);
+        if (mobile != null)
+            c.setMobile(mobile);
         return customerRepository.save(c);
     }
 
     public boolean changePassword(String email, String oldPassword, String newPassword) {
-        Customer c = customerRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-        if (!passwordEncoder.matches(oldPassword, c.getPassword())) return false;
+        Customer c = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        if (!passwordEncoder.matches(oldPassword, c.getPassword()))
+            return false;
         c.setPassword(passwordEncoder.encode(newPassword));
         customerRepository.save(c);
         return true;
     }
+
     public void resendOtp(String identifier, String type) {
         // type: "email" or "mobile"
         // identifier: email address or mobile number
-        
+
         // Validation: Verify user exists
         if ("mobile".equalsIgnoreCase(type)) {
-             customerRepository.findByMobile(identifier)
-                 .orElseThrow(() -> new IllegalArgumentException("No customer found with this mobile number."));
-             logger.info("Resending mobile OTP to: {}", identifier);
-             otpService.sendOtpWithContext(identifier, "CUSTOMER_MOBILE", 120);
-             logger.debug("Mobile OTP sent successfully to: {}", identifier);
+            customerRepository.findByMobile(identifier)
+                    .orElseThrow(() -> new IllegalArgumentException("No customer found with this mobile number."));
+            logger.info("Resending mobile OTP to: {}", identifier);
+            otpService.sendOtpWithContext(identifier, "CUSTOMER_MOBILE", 120);
+            logger.debug("Mobile OTP sent successfully to: {}", identifier);
         } else {
-             // default to email
-             customerRepository.findByEmail(identifier)
-                 .orElseThrow(() -> new IllegalArgumentException("No customer found with this email."));
-             logger.info("Resending email OTP to: {}", identifier);
-             otpService.sendOtpWithContext(identifier, "CUSTOMER_EMAIL", 120);
-             logger.debug("Email OTP sent successfully to: {}", identifier);
+            // default to email
+            customerRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new IllegalArgumentException("No customer found with this email."));
+            logger.info("Resending email OTP to: {}", identifier);
+            otpService.sendOtpWithContext(identifier, "CUSTOMER_EMAIL", 120);
+            logger.debug("Email OTP sent successfully to: {}", identifier);
         }
     }
-
 
     private void checkAndSendWelcomeEmail(Customer c) {
         boolean emailVerified = c.isEmailVerified();

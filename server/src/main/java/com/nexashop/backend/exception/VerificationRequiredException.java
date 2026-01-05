@@ -1,5 +1,9 @@
 package com.nexashop.backend.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.FORBIDDEN)
 public class VerificationRequiredException extends RuntimeException {
     private final boolean emailVerified;
     private final boolean mobileVerified;
@@ -7,7 +11,8 @@ public class VerificationRequiredException extends RuntimeException {
     private final String email;
     private final String mobile;
 
-    public VerificationRequiredException(String message, boolean emailVerified, boolean mobileVerified, String accountStatus, String email, String mobile) {
+    public VerificationRequiredException(String message, boolean emailVerified, boolean mobileVerified,
+            String accountStatus, String email, String mobile) {
         super(message);
         this.emailVerified = emailVerified;
         this.mobileVerified = mobileVerified;
@@ -36,4 +41,3 @@ public class VerificationRequiredException extends RuntimeException {
         return mobile;
     }
 }
-

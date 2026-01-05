@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLoginSellerMutation, useVerifySellerOtpMutation, useVerifySellerMobileOtpMutation, useResendSellerOtpMutation } from '../../store/api/api.apislice';
+import { useLoginSellerMutation, useVerifySellerOtpMutation, useVerifySellerMobileOtpMutation, useResendSellerOtpMutation, useResendSellerVerificationEmailMutation } from '../../store/api/api.apislice';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../store/slices/auth.slice';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +22,7 @@ const SellerLoginContainer = () => {
     const [verifyEmail, { isLoading: isVerifyingEmail }] = useVerifySellerOtpMutation();
     const [verifyMobile, { isLoading: isVerifyingMobile }] = useVerifySellerMobileOtpMutation();
     const [resendOtp] = useResendSellerOtpMutation();
+    const [resendEmail] = useResendSellerVerificationEmailMutation();
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -44,6 +45,10 @@ const SellerLoginContainer = () => {
                     mobile: errorData.mobile || '',
                 });
                 setShowVerificationModal(true);
+                // Notify user that codes have been resent
+                // You might want to use a toast here, but for now we'll rely on the modal text or console
+                console.log('Verification codes have been auto-resent.');
+                alert("Verification incomplete. New verification codes/links have been sent to your email and mobile.");
             } else {
                 console.error('Login failed:', err);
             }
@@ -79,9 +84,7 @@ const SellerLoginContainer = () => {
             if (type === 'mobile') {
                 await resendOtp({ identifier }).unwrap();
             } else {
-                // Email resend for seller might need different endpoint
-                // For now, seller email verification is link-based
-                throw new Error('Email verification link should be resent from registration');
+                await resendEmail({ email: identifier }).unwrap();
             }
         } catch (err) {
             throw err;

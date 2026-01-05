@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping({"/api/v1/sellers", "/api/sellers"})
+@RequestMapping({ "/api/v1/sellers", "/api/sellers" })
 public class SellerController {
 
     private final SellerService sellerService;
@@ -35,5 +35,16 @@ public class SellerController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginSeller(@RequestBody SellerLoginRequest request) {
         return ResponseEntity.ok(sellerService.loginSeller(request));
+    }
+
+    @Operation(summary = "Resend seller verification email")
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<?> resendVerificationEmail(@RequestBody java.util.Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "Email is required"));
+        }
+        sellerService.resendVerificationEmail(email);
+        return ResponseEntity.ok(java.util.Map.of("message", "Verification email resent"));
     }
 }

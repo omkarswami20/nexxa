@@ -5,7 +5,7 @@ export const transformProductResponse = (response) => {
             ...response,
             name: response?.name || 'Unknown Product',
             description: response?.description || '',
-            imageUrl: response?.imageUrl || '',
+            imageUrl: response?.imageUrl || response?.image || '',
             price: parseFloat(response?.price) || 0,
             stockQuantity: parseInt(response?.stockQuantity) || 0,
             createdAt: response?.createdAt ? new Date(response.createdAt) : null,

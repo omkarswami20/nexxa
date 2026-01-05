@@ -55,6 +55,9 @@ const CustomerLoginContainer = () => {
                     mobile: errorData.mobile || '',
                 });
                 setShowVerificationModal(true);
+                // Notify user that codes have been resent
+                console.log('Verification codes have been auto-resent.');
+                alert("Verification incomplete. New verification codes have been sent to your email and mobile.");
             } else {
                 console.error('Failed to login:', err);
             }

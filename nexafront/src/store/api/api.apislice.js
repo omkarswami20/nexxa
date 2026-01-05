@@ -435,6 +435,13 @@ export const api = createApi({
                 body: { identifier },
             }),
         }),
+        resendSellerVerificationEmail: builder.mutation({
+            query: ({ email }) => ({
+                url: '/sellers/resend-verification-email',
+                method: 'POST',
+                body: { email },
+            }),
+        }),
         sendUserOtp: builder.mutation({
             query: (email) => ({
                 url: '/otp/user/send',
@@ -492,6 +499,7 @@ export const {
     useVerifySellerEmailMutation,
     useVerifySellerMobileOtpMutation,
     useResendSellerOtpMutation,
+    useResendSellerVerificationEmailMutation,
     // Customer Auth/Profile/Addresses
     useRegisterCustomerMutation,
     useLoginCustomerMutation,
