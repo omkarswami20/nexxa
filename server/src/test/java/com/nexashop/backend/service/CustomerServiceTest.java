@@ -4,6 +4,7 @@ import com.nexashop.backend.dto.CustomerLoginRequest;
 import com.nexashop.backend.dto.CustomerRegisterRequest;
 import com.nexashop.backend.entity.Customer;
 import com.nexashop.backend.exception.VerificationRequiredException;
+import com.nexashop.backend.entity.RefreshToken;
 import com.nexashop.backend.repository.CustomerRepository;
 import com.nexashop.backend.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,11 +100,13 @@ class CustomerServiceTest {
         CustomerLoginRequest loginRequest = new CustomerLoginRequest();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password123");
-        
+
         when(customerRepository.findByEmail(anyString())).thenReturn(Optional.of(customer));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtUtils.generateToken(anyString(), anyString())).thenReturn("jwtToken");
-        when(refreshTokenService.createRefreshToken(anyString())).thenReturn(any());
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken("refreshToken");
+        when(refreshTokenService.createRefreshToken(anyString())).thenReturn(refreshToken);
 
         var result = customerService.login(loginRequest);
 
@@ -116,7 +119,7 @@ class CustomerServiceTest {
         CustomerLoginRequest loginRequest = new CustomerLoginRequest();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("wrongpassword");
-        
+
         when(customerRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         assertThrows(BadCredentialsException.class, () -> {
@@ -129,7 +132,7 @@ class CustomerServiceTest {
         CustomerLoginRequest loginRequest = new CustomerLoginRequest();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password123");
-        
+
         customer.setEmailVerified(false);
         when(customerRepository.findByEmail(anyString())).thenReturn(Optional.of(customer));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
@@ -139,4 +142,3 @@ class CustomerServiceTest {
         });
     }
 }
-

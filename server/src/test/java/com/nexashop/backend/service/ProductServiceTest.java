@@ -69,13 +69,12 @@ class ProductServiceTest {
                 eq(ProductStatus.ACTIVE),
                 isNull(),
                 isNull(),
-                any(Pageable.class)
-        )).thenReturn(productPage);
+                any(Pageable.class))).thenReturn(productPage);
 
         var result = productService.getAllActiveProductsPaginated(null, null, 12, 0);
 
         assertNotNull(result);
-        assertEquals(1, result.get("total"));
+        assertEquals(1L, result.get("total"));
         assertEquals(1, result.get("page"));
         assertEquals(12, result.get("pageSize"));
         assertNotNull(result.get("products"));
@@ -90,19 +89,17 @@ class ProductServiceTest {
                 eq(ProductStatus.ACTIVE),
                 eq("Electronics"),
                 isNull(),
-                any(Pageable.class)
-        )).thenReturn(productPage);
+                any(Pageable.class))).thenReturn(productPage);
 
         var result = productService.getAllActiveProductsPaginated("Electronics", null, 12, 0);
 
         assertNotNull(result);
-        assertEquals(1, result.get("total"));
+        assertEquals(1L, result.get("total"));
         verify(productRepository, times(1)).findActiveProductsWithFilters(
                 eq(ProductStatus.ACTIVE),
                 eq("Electronics"),
                 isNull(),
-                any(Pageable.class)
-        );
+                any(Pageable.class));
     }
 
     @Test
@@ -114,8 +111,7 @@ class ProductServiceTest {
                 eq(ProductStatus.ACTIVE),
                 isNull(),
                 eq("Test"),
-                any(Pageable.class)
-        )).thenReturn(productPage);
+                any(Pageable.class))).thenReturn(productPage);
 
         var result = productService.getAllActiveProductsPaginated(null, "Test", 12, 0);
 
@@ -124,8 +120,7 @@ class ProductServiceTest {
                 eq(ProductStatus.ACTIVE),
                 isNull(),
                 eq("Test"),
-                any(Pageable.class)
-        );
+                any(Pageable.class));
     }
 
     @Test
@@ -148,5 +143,3 @@ class ProductServiceTest {
         assertEquals("Test Product", result.getName());
     }
 }
-
-
