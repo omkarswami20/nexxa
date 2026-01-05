@@ -9,6 +9,7 @@ export const transformProductResponse = (response) => {
             price: parseFloat(response?.price) || 0,
             stockQuantity: parseInt(response?.stockQuantity) || 0,
             createdAt: response?.createdAt ? new Date(response.createdAt) : null,
+            category: response?.category || (response?.categoryName ? { name: response.categoryName, id: response.categoryId } : null),
             updatedAt: response?.updatedAt ? new Date(response.updatedAt) : null,
         };
     }
@@ -25,6 +26,7 @@ export const transformProductListResponse = (response) => {
             price: parseFloat(product?.price) || 0,
             stockQuantity: parseInt(product?.stockQuantity) || 0,
             createdAt: product?.createdAt ? new Date(product.createdAt) : null,
+            category: product?.category || (product?.categoryName ? { name: product.categoryName, id: product.categoryId } : null),
             updatedAt: product?.updatedAt ? new Date(product.updatedAt) : null,
         }));
     }
@@ -43,6 +45,7 @@ export const transformPaginatedProductResponse = (response) => {
                 price: parseFloat(product?.price) || 0,
                 stockQuantity: parseInt(product?.stockQuantity) || 0,
                 createdAt: product?.createdAt ? new Date(product.createdAt) : null,
+                category: product?.category || (product?.categoryName ? { name: product.categoryName, id: product.categoryId } : null),
                 updatedAt: product?.updatedAt ? new Date(product.updatedAt) : null,
             })),
             total: response?.total || 0,
@@ -61,6 +64,7 @@ export const transformPaginatedProductResponse = (response) => {
                 price: parseFloat(product?.price) || 0,
                 stockQuantity: parseInt(product?.stockQuantity) || 0,
                 createdAt: product?.createdAt ? new Date(product.createdAt) : null,
+                category: product?.category || (product?.categoryName ? { name: product.categoryName, id: product.categoryId } : null),
                 updatedAt: product?.updatedAt ? new Date(product.updatedAt) : null,
             })),
             total: response.length,
