@@ -83,6 +83,21 @@
                             }
                         }
                     }
+                },
+                "403": {
+                    "description": "Verification Required",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "status": 403,
+                                "error": "VERIFICATION_REQUIRED",
+                                "message": "Please complete verification to login",
+                                "emailVerified": false,
+                                "mobileVerified": false,
+                                "accountStatus": "PENDING"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -239,6 +254,47 @@
                         "application/json": {
                             "example": {
                                 "message": "Password updated"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/resend-otp",
+            "summary": "Resend OTP",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "identifier": {
+                                    "type": "string",
+                                    "example": "john@example.com"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "email",
+                                        "mobile"
+                                    ],
+                                    "example": "email"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "OTP Resent",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "OTP sent successfully"
                             }
                         }
                     }

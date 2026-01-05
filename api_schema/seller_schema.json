@@ -84,6 +84,54 @@
                             }
                         }
                     }
+                },
+                "403": {
+                    "description": "Verification Required",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "status": 403,
+                                "error": "VERIFICATION_REQUIRED",
+                                "message": "Please complete verification to login",
+                                "emailVerified": false,
+                                "mobileVerified": false,
+                                "accountStatus": "PENDING_ADMIN_APPROVAL"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/resend-verification-email",
+            "summary": "Resend Verification Email",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "jane@seller.com"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Email resent",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "Verification email resent"
+                            }
+                        }
+                    }
                 }
             }
         },
