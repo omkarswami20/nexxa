@@ -11,18 +11,56 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/v1/auth", "/api/auth"})
+@RequestMapping({ "/api/v1/auth", "/api/auth" })
 public class AuthController {
     private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
     private final com.nexashop.backend.security.JwtUtils jwtUtils;
     private final com.nexashop.backend.repository.SellerRepository sellerRepository;
+    private final com.nexashop.backend.service.SellerService sellerService;
+    private final com.nexashop.backend.service.CustomerService customerService;
 
     public AuthController(com.nexashop.backend.service.RefreshTokenService refreshTokenService,
             com.nexashop.backend.security.JwtUtils jwtUtils,
-            com.nexashop.backend.repository.SellerRepository sellerRepository) {
+            com.nexashop.backend.repository.SellerRepository sellerRepository,
+            com.nexashop.backend.service.SellerService sellerService,
+            com.nexashop.backend.service.CustomerService customerService) {
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
         this.sellerRepository = sellerRepository;
+        this.sellerService = sellerService;
+        this.customerService = customerService;
+    }
+
+    @Operation(summary = "Register a new Seller", description = "Creates a new seller account with PENDING_APPROVAL status and sends a verification email.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Registration successful"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Email already exists")
+    })
+    @PostMapping("/register/seller")
+    public ResponseEntity<com.nexashop.backend.entity.Seller> registerSeller(
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.SellerRegisterRequest request) {
+        return ResponseEntity.ok(sellerService.registerSeller(request));
+    }
+
+    @PostMapping("/login/seller")
+    public ResponseEntity<com.nexashop.backend.dto.LoginResponse> loginSeller(
+            @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.SellerLoginRequest request) {
+        return ResponseEntity.ok(sellerService.loginSeller(request));
+    }
+
+    @Operation(summary = "Register a customer and send OTPs")
+    @PostMapping("/register/customer")
+    public ResponseEntity<?> registerCustomer(
+            @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.CustomerRegisterRequest req) {
+        var saved = customerService.register(req);
+        return ResponseEntity.ok(Map.of("id", saved.getId(), "email", saved.getEmail()));
+    }
+
+    @Operation(summary = "Login customer")
+    @PostMapping("/login/customer")
+    public ResponseEntity<com.nexashop.backend.dto.LoginResponse> loginCustomer(
+            @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.CustomerLoginRequest req) {
+        return ResponseEntity.ok(customerService.login(req));
     }
 
     @Operation(summary = "Refresh Access Token")
@@ -40,7 +78,8 @@ public class AuthController {
                     String token = jwtUtils.generateToken(email, role);
                     return ResponseEntity
                             .ok(new com.nexashop.backend.dto.TokenRefreshResponse(token, requestRefreshToken));
-                }).orElseThrow(() -> new InvalidRefreshTokenException("Refresh token is not in database or has expired"));
+                })
+                .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token is not in database or has expired"));
     }
 
     @Operation(summary = "Logout user", security = @SecurityRequirement(name = "bearerAuth"))

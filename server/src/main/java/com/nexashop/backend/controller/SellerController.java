@@ -22,23 +22,8 @@ public class SellerController {
         this.sellerService = sellerService;
     }
 
-    @Operation(summary = "Register a new Seller", description = "Creates a new seller account with PENDING_APPROVAL status and sends a verification email.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Registration successful"),
-            @ApiResponse(responseCode = "400", description = "Email already exists")
-    })
-    @PostMapping("/register")
-    public ResponseEntity<Seller> registerSeller(@Valid @RequestBody SellerRegisterRequest request) {
-        return ResponseEntity.ok(sellerService.registerSeller(request));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginSeller(@RequestBody SellerLoginRequest request) {
-        return ResponseEntity.ok(sellerService.loginSeller(request));
-    }
-
     @Operation(summary = "Resend seller verification email")
-    @PostMapping("/resend-verification-email")
+    @PostMapping("/verification/resend")
     public ResponseEntity<?> resendVerificationEmail(@RequestBody java.util.Map<String, String> body) {
         String email = body.get("email");
         if (email == null || email.isBlank()) {

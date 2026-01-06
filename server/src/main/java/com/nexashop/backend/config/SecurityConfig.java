@@ -32,13 +32,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Explicitly allow OPTIONS
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Explicitly
+                                                                                                         // allow
+                                                                                                         // OPTIONS
                         // Public endpoints (v1)
-                        .requestMatchers("/api/v1/sellers/register", "/api/v1/sellers/login", "/api/v1/admin/login").permitAll()
+                        .requestMatchers("/api/v1/auth/login/**", "/api/v1/auth/register/**").permitAll()
                         .requestMatchers("/api/v1/auth/refresh-token").permitAll()
                         .requestMatchers("/api/v1/otp/**").permitAll()
-                        .requestMatchers("/api/v1/customers/register", "/api/v1/customers/login").permitAll()
-                        .requestMatchers("/api/v1/customers/verify-email-otp", "/api/v1/customers/verify-mobile-otp").permitAll()
+                        .requestMatchers("/api/v1/customers/verify-email-otp", "/api/v1/customers/verify-mobile-otp")
+                        .permitAll()
                         .requestMatchers("/api/v1/customers/resend-otp").permitAll()
                         .requestMatchers("/api/v1/customers/forgot-password/**").permitAll()
                         .requestMatchers("/api/v1/sellers/verify").permitAll()
@@ -48,7 +50,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/refresh-token").permitAll()
                         .requestMatchers("/api/otp/**").permitAll()
                         .requestMatchers("/api/customers/register", "/api/customers/login").permitAll()
-                        .requestMatchers("/api/customers/verify-email-otp", "/api/customers/verify-mobile-otp").permitAll()
+                        .requestMatchers("/api/customers/verify-email-otp", "/api/customers/verify-mobile-otp")
+                        .permitAll()
                         .requestMatchers("/api/customers/resend-otp").permitAll()
                         .requestMatchers("/api/customers/forgot-password/**").permitAll()
                         .requestMatchers("/api/sellers/verify").permitAll()
@@ -68,8 +71,10 @@ public class SecurityConfig {
                         // Public resources
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll() // Backward compatibility
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll() // Allow categories
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll() // Backward
+                                                                                                                  // compatibility
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll() // Allow
+                                                                                                                       // categories
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()

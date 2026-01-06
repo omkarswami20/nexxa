@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @Tag(name = "Orders")
-@RequestMapping({"/api/v1", "/api"})
+@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -30,20 +30,20 @@ public class OrderController {
 
     // Customer endpoints
     @Operation(summary = "List customer's orders", security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/orders")
+    @GetMapping
     public ResponseEntity<List<Order>> listOrders(Principal principal) {
         return ResponseEntity.ok(orderService.listOrders(principal.getName()));
     }
 
     @Operation(summary = "Get order detail", security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/orders/{orderId}")
+    @GetMapping("/{orderId}")
     public ResponseEntity<Map<String, Object>> getOrder(Principal principal, @PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrder(principal.getName(), orderId));
     }
 
     // Seller endpoints
     @Operation(summary = "List seller order items", security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/seller/orders")
+    @GetMapping("/seller")
     public ResponseEntity<List<OrderItem>> listSellerOrderItems(Principal principal) {
         Seller seller = sellerRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
@@ -51,10 +51,10 @@ public class OrderController {
     }
 
     @Operation(summary = "Update seller order item status", security = @SecurityRequirement(name = "bearerAuth"))
-    @PatchMapping("/seller/orders/{orderItemId}/status")
+    @PatchMapping("/seller/{orderItemId}/status")
     public ResponseEntity<OrderItem> updateSellerOrderItemStatus(Principal principal,
-                                                                 @PathVariable Long orderItemId,
-                                                                 @RequestBody Map<String, String> body) {
+            @PathVariable Long orderItemId,
+            @RequestBody Map<String, String> body) {
         Seller seller = sellerRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
         String statusStr = body.get("status");

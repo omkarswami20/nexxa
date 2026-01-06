@@ -65,14 +65,14 @@ export const api = createApi({
         // Seller Endpoints
         registerSeller: builder.mutation({
             query: (credentials) => ({
-                url: '/sellers/register',
+                url: '/v1/auth/register/seller',
                 method: 'POST',
                 body: credentials,
             }),
         }),
         loginSeller: builder.mutation({
             query: (credentials) => ({
-                url: '/sellers/login',
+                url: '/v1/auth/login/seller',
                 method: 'POST',
                 body: credentials,
             }),
@@ -86,16 +86,16 @@ export const api = createApi({
 
         // Customer Auth & Profile Endpoints
         registerCustomer: builder.mutation({
-            query: (data) => ({ url: '/customers/register', method: 'POST', body: data }),
+            query: (data) => ({ url: '/v1/auth/register/customer', method: 'POST', body: data }),
         }),
         loginCustomer: builder.mutation({
-            query: (data) => ({ url: '/customers/login', method: 'POST', body: data }),
+            query: (data) => ({ url: '/v1/auth/login/customer', method: 'POST', body: data }),
         }),
         verifyCustomerEmailOtp: builder.mutation({
-            query: ({ email, otp }) => ({ url: '/customers/verify-email-otp', method: 'POST', body: { email, otp } }),
+            query: ({ email, otp }) => ({ url: '/v1/customers/otp/verify-email', method: 'POST', body: { email, otp } }),
         }),
         verifyCustomerMobileOtp: builder.mutation({
-            query: ({ mobile, otp }) => ({ url: '/customers/verify-mobile-otp', method: 'POST', body: { mobile, otp } }),
+            query: ({ mobile, otp }) => ({ url: '/v1/customers/otp/verify-mobile', method: 'POST', body: { mobile, otp } }),
         }),
         resendOtp: builder.mutation({
             query: ({ identifier, type }) => ({ url: '/customers/resend-otp', method: 'POST', body: { identifier, type } }),
@@ -140,7 +140,7 @@ export const api = createApi({
         // Admin Endpoints
         loginAdmin: builder.mutation({
             query: (credentials) => ({
-                url: '/admin/login',
+                url: '/v1/auth/login/admin',
                 method: 'POST',
                 body: credentials,
             }),
@@ -192,7 +192,7 @@ export const api = createApi({
             transformResponse: transformPaginatedProductResponse,
         }),
         getSellerProductList: builder.query({
-            query: () => '/products/seller/list',
+            query: () => '/products/seller/summaries',
             providesTags: (result) => {
                 const list = result ?? [];
                 return list.length
@@ -354,7 +354,7 @@ export const api = createApi({
                     body.address = address;
                 }
                 return {
-                    url: '/checkout',
+                    url: '/v1/orders/checkout',
                     method: 'POST',
                     body,
                 };
@@ -364,7 +364,7 @@ export const api = createApi({
 
         // Orders (Customer)
         getOrders: builder.query({
-            query: () => '/orders',
+            query: () => '/v1/orders',
             providesTags: (result) => {
                 const list = result ?? [];
                 return list.length
@@ -377,14 +377,14 @@ export const api = createApi({
             transformResponse: transformOrderListResponse,
         }),
         getOrderById: builder.query({
-            query: (orderId) => `/orders/${orderId}`,
+            query: (orderId) => `/v1/orders/${orderId}`,
             providesTags: (result, error, id) => [{ type: 'Order', id }],
             transformResponse: transformOrderDetailResponse,
         }),
 
         // Orders (Seller)
         getSellerOrderItems: builder.query({
-            query: () => '/seller/orders',
+            query: () => '/v1/orders/seller',
             providesTags: (result) => {
                 const list = result ?? [];
                 return list.length
@@ -397,7 +397,7 @@ export const api = createApi({
         }),
         updateSellerOrderItemStatus: builder.mutation({
             query: ({ orderItemId, status }) => ({
-                url: `/seller/orders/${orderItemId}/status`,
+                url: `/v1/orders/seller/${orderItemId}/status`,
                 method: 'PATCH',
                 body: { status },
             }),
@@ -437,7 +437,7 @@ export const api = createApi({
         }),
         resendSellerVerificationEmail: builder.mutation({
             query: ({ email }) => ({
-                url: '/sellers/resend-verification-email',
+                url: '/sellers/verification/resend',
                 method: 'POST',
                 body: { email },
             }),

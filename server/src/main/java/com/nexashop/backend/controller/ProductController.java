@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping({"/api/v1/products", "/api/products"})
+@RequestMapping({ "/api/v1/products", "/api/products" })
 public class ProductController {
 
     private final ProductService productService;
@@ -56,7 +56,7 @@ public class ProductController {
     }
 
     @Operation(summary = "Get list of all product names for current seller", security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/seller/list")
+    @GetMapping("/seller/summaries")
     public ResponseEntity<List<Map<String, Object>>> getSellerProductList(Principal principal) {
         return ResponseEntity.ok(productService.getSellerProductList(principal.getName()));
     }

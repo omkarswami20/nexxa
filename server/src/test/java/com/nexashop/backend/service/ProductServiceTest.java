@@ -143,3 +143,4 @@ class ProductServiceTest {
         assertEquals("Test Product", result.getName());
     }
 }
+

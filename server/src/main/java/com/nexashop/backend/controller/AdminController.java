@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/admin", "/api/admin"})
+@RequestMapping({ "/api/v1/admin", "/api/admin" })
 public class AdminController {
 
     private final AdminAuthService adminAuthService;
@@ -25,7 +25,7 @@ public class AdminController {
     }
 
     // -------- LOGIN ONLY OPEN ENDPOINT -------- //
-    @PostMapping("/login")
+    @PostMapping("/api/v1/auth/login/admin")
     public ResponseEntity<LoginResponse> loginAdmin(@RequestBody AdminLoginRequest request) {
         return ResponseEntity.ok(adminAuthService.login(request));
     }
