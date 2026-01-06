@@ -10,6 +10,50 @@ import { useGetCartQuery } from '../../store/api/api.apislice';
 import MobileMenu from '../common/MobileMenu';
 import { motion } from 'framer-motion';
 
+const NavLink = ({ to, label, isActive, activeColor }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+        <Box
+            component={Link}
+            to={to}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            sx={{
+                position: 'relative',
+                color: isActive || isHovered ? activeColor : '#94a3b8',
+                fontWeight: isActive ? 700 : 500,
+                textDecoration: 'none',
+                px: 2,
+                py: 1,
+                transition: 'color 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
+            {label}
+            {(isActive || isHovered) && (
+                <Box
+                    component={motion.div}
+                    layoutId="nav-underline"
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        height: '2px',
+                        bgcolor: activeColor,
+                        width: '100%',
+                    }}
+                />
+            )}
+        </Box>
+    );
+};
+
 const Layout = () => {
     const token = useSelector(selectCurrentToken);
     const role = useSelector(selectCurrentRole);
@@ -50,16 +94,18 @@ const Layout = () => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+        <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#0f172a' }}>
             <AppBar 
                 position="sticky" 
                 elevation={scrolled ? 4 : 0}
                 sx={{ 
-                    bgcolor: scrolled ? 'background.paper' : 'rgba(255, 255, 255, 0.95)',
+                    bgcolor: scrolled ? 'rgba(15, 23, 42, 0.9)' : 'transparent',
                     backdropFilter: 'blur(10px)',
                     borderBottom: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: scrolled ? 'rgba(255,255,255,0.1)' : 'transparent',
                     transition: 'all 0.3s ease',
+                    backgroundImage: 'none',
+                    boxShadow: scrolled ? '0 4px 30px rgba(0, 0, 0, 0.1)' : 'none',
                 }}
             >
                 <Container maxWidth="xl">
@@ -67,7 +113,7 @@ const Layout = () => {
                         {/* Mobile Menu Button */}
                         <IconButton
                             onClick={() => setMobileMenuOpen(true)}
-                            sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'text.primary' }}
+                            sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: '#fff' }}
                         >
                             <MenuIcon />
                         </IconButton>
@@ -81,12 +127,15 @@ const Layout = () => {
                             sx={{
                                 mr: 2,
                                 display: { xs: 'flex', md: 'flex' },
-                                fontWeight: 700,
+                                fontWeight: 800,
                                 letterSpacing: '0.02em',
-                                color: 'text.primary',
+                                color: '#fff',
                                 textDecoration: 'none',
                                 flexGrow: { xs: 1, md: 0 },
-                                fontSize: { xs: '1rem', md: '1.25rem' },
+                                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                                background: 'linear-gradient(to right, #fff, #94a3b8)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
                             }}
                         >
                             NEXASHOP
@@ -98,7 +147,7 @@ const Layout = () => {
                                 component={Link}
                                 to="/cart"
                                 color="inherit"
-                                sx={{ display: { xs: 'none', md: 'flex' }, mr: 1.5, color: 'primary.main' }}
+                                sx={{ display: { xs: 'none', md: 'flex' }, mr: 1.5, color: '#fff' }}
                             >
                                 <Badge badgeContent={cartItemCount} color="error">
                                     <ShoppingBagIcon />
@@ -106,62 +155,27 @@ const Layout = () => {
                             </IconButton>
                         )}
 
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1.5, ml: 'auto', alignItems: 'center' }}>
+                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, ml: 'auto', alignItems: 'center' }}>
                             {!token ? (
                                 <>
-                                    <Button
-                                        color="inherit"
-                                        component={Link}
-                                        to="/customer/login"
-                                        sx={{
-                                            color: isActiveRoute('/customer/login') ? 'primary.main' : 'text.primary',
-                                            fontWeight: isActiveRoute('/customer/login') ? 600 : 400,
-                                            '&:hover': {
-                                                bgcolor: 'action.hover',
-                                            }
-                                        }}
-                                    >
-                                        Customer Login
-                                    </Button>
-                                    <Button
-                                        color="inherit"
-                                        component={Link}
-                                        to="/customer/register"
-                                        sx={{
-                                            color: isActiveRoute('/customer/register') ? 'primary.main' : 'text.primary',
-                                            fontWeight: isActiveRoute('/customer/register') ? 600 : 400,
-                                            '&:hover': {
-                                                bgcolor: 'action.hover',
-                                            }
-                                        }}
-                                    >
-                                        Register
-                                    </Button>
-                                    <Button
-                                        color="inherit"
-                                        component={Link}
-                                        to="/seller/login"
-                                        sx={{
-                                            color: isActiveRoute('/seller/login') ? 'primary.main' : 'text.primary',
-                                            fontWeight: isActiveRoute('/seller/login') ? 600 : 400,
-                                            '&:hover': {
-                                                bgcolor: 'action.hover',
-                                            }
-                                        }}
-                                    >
-                                        Seller Login
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        component={Link}
-                                        to="/admin/login"
-                                        sx={{
-                                            fontWeight: isActiveRoute('/admin/login') ? 600 : 400,
-                                        }}
-                                    >
-                                        Admin Portal
-                                    </Button>
+                                    <NavLink 
+                                        to="/admin/login" 
+                                        label="Admin" 
+                                        isActive={isActiveRoute('/admin/login')} 
+                                        activeColor="#db2777" 
+                                    />
+                                    <NavLink 
+                                        to="/customer/login" 
+                                        label="Customer" 
+                                        isActive={isActiveRoute('/customer/login')} 
+                                        activeColor="#0ea5e9" 
+                                    />
+                                    <NavLink 
+                                        to="/seller/login" 
+                                        label="Seller" 
+                                        isActive={isActiveRoute('/seller/login')} 
+                                        activeColor="#6366f1" 
+                                    />
                                 </>
                             ) : (
                                 <div>
@@ -172,7 +186,7 @@ const Layout = () => {
                                         aria-haspopup="true"
                                         onClick={handleMenu}
                                         color="inherit"
-                                        sx={{ color: 'text.primary' }}
+                                        sx={{ color: '#fff' }}
                                     >
                                         <AccountCircle />
                                     </IconButton>
@@ -194,8 +208,14 @@ const Layout = () => {
                                             sx: {
                                                 mt: 1.5,
                                                 minWidth: 200,
-                                                border: '1px solid',
-                                                borderColor: 'divider',
+                                                bgcolor: '#1e293b',
+                                                color: '#fff',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                '& .MuiMenuItem-root': {
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(255,255,255,0.05)',
+                                                    },
+                                                },
                                             }
                                         }}
                                     >
@@ -205,7 +225,7 @@ const Layout = () => {
                                             <MenuItem key="cart" onClick={() => { handleClose(); navigate('/cart'); }}>
                                                 My Cart {cartItemCount > 0 && `(${cartItemCount})`}
                                             </MenuItem>,
-                                            <Divider key="divider" />
+                                            <Divider key="divider" sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
                                         ]}
                                         {role === 'seller' && (
                                             <MenuItem onClick={() => { handleClose(); navigate('/seller/dashboard'); }}>Dashboard</MenuItem>
@@ -224,10 +244,9 @@ const Layout = () => {
 
             <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
-            <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
-                <Container maxWidth="xl">
-                    <Outlet />
-                </Container>
+            <Box component="main" sx={{ flexGrow: 1, py: 0 }}>
+                {/* Removed Container wrapper to allow full-width landing page */}
+                <Outlet />
             </Box>
 
             <Box
@@ -236,14 +255,15 @@ const Layout = () => {
                     py: 3,
                     mt: 'auto',
                     borderTop: '1px solid',
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper'
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    bgcolor: '#0f172a',
+                    color: '#94a3b8'
                 }}
             >
                 <Container maxWidth="sm">
-                    <Typography variant="body2" color="text.secondary" align="center">
+                    <Typography variant="body2" align="center">
                         {'Copyright © '}
-                        <Link to="/" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 500 }}>
+                        <Link to="/" style={{ textDecoration: 'none', color: '#fff', fontWeight: 500 }}>
                             NexaShop
                         </Link>{' '}
                         {new Date().getFullYear()}

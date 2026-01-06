@@ -48,15 +48,18 @@ const MobileMenu = ({ open, onClose }) => {
             PaperProps={{
                 sx: {
                     width: 300,
+                    bgcolor: '#1e293b',
+                    color: '#fff',
+                    borderLeft: '1px solid rgba(255,255,255,0.1)',
                 },
             }}
         >
-            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'rgba(255,255,255,0.1)' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h6" fontWeight={600}>
                         Menu
                     </Typography>
-                    <IconButton onClick={onClose} size="small">
+                    <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
@@ -68,17 +71,20 @@ const MobileMenu = ({ open, onClose }) => {
                     onClick={onClose}
                     selected={isActiveRoute('/') && location.pathname === '/'}
                     sx={{
+                        color: '#fff',
                         '&.Mui-selected': {
-                            bgcolor: 'primary.light',
-                            color: 'primary.main',
+                            bgcolor: 'rgba(255,255,255,0.1)',
                             '&:hover': {
-                                bgcolor: 'primary.light',
+                                bgcolor: 'rgba(255,255,255,0.15)',
                             },
+                        },
+                        '&:hover': {
+                            bgcolor: 'rgba(255,255,255,0.05)',
                         },
                     }}
                 >
-                    <ListItemIcon>
-                        <HomeIcon color={isActiveRoute('/') && location.pathname === '/' ? 'primary' : 'inherit'} />
+                    <ListItemIcon sx={{ color: '#fff' }}>
+                        <HomeIcon color={isActiveRoute('/') && location.pathname === '/' ? 'secondary' : 'inherit'} />
                     </ListItemIcon>
                     <ListItemText primary="Home" />
                 </ListItemButton>
@@ -89,18 +95,21 @@ const MobileMenu = ({ open, onClose }) => {
                             onClick={() => handleNavigate('/cart')}
                             selected={isActiveRoute('/cart')}
                             sx={{
+                                color: '#fff',
                                 '&.Mui-selected': {
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.main',
+                                    bgcolor: 'rgba(255,255,255,0.1)',
                                     '&:hover': {
-                                        bgcolor: 'primary.light',
+                                        bgcolor: 'rgba(255,255,255,0.15)',
                                     },
+                                },
+                                '&:hover': {
+                                    bgcolor: 'rgba(255,255,255,0.05)',
                                 },
                             }}
                         >
-                            <ListItemIcon>
+                            <ListItemIcon sx={{ color: '#fff' }}>
                                 <Badge badgeContent={cartItemCount} color="error">
-                                    <ShoppingCartIcon color={isActiveRoute('/cart') ? 'primary' : 'inherit'} />
+                                    <ShoppingCartIcon color={isActiveRoute('/cart') ? 'secondary' : 'inherit'} />
                                 </Badge>
                             </ListItemIcon>
                             <ListItemText primary="Cart" />
@@ -109,17 +118,20 @@ const MobileMenu = ({ open, onClose }) => {
                             onClick={() => handleNavigate('/orders')}
                             selected={isActiveRoute('/orders')}
                             sx={{
+                                color: '#fff',
                                 '&.Mui-selected': {
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.main',
+                                    bgcolor: 'rgba(255,255,255,0.1)',
                                     '&:hover': {
-                                        bgcolor: 'primary.light',
+                                        bgcolor: 'rgba(255,255,255,0.15)',
                                     },
+                                },
+                                '&:hover': {
+                                    bgcolor: 'rgba(255,255,255,0.05)',
                                 },
                             }}
                         >
-                            <ListItemIcon>
-                                <PersonIcon color={isActiveRoute('/orders') ? 'primary' : 'inherit'} />
+                            <ListItemIcon sx={{ color: '#fff' }}>
+                                <PersonIcon color={isActiveRoute('/orders') ? 'secondary' : 'inherit'} />
                             </ListItemIcon>
                             <ListItemText primary="My Orders" />
                         </ListItemButton>
@@ -127,17 +139,20 @@ const MobileMenu = ({ open, onClose }) => {
                             onClick={() => handleNavigate('/customer/profile')}
                             selected={isActiveRoute('/customer/profile')}
                             sx={{
+                                color: '#fff',
                                 '&.Mui-selected': {
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.main',
+                                    bgcolor: 'rgba(255,255,255,0.1)',
                                     '&:hover': {
-                                        bgcolor: 'primary.light',
+                                        bgcolor: 'rgba(255,255,255,0.15)',
                                     },
+                                },
+                                '&:hover': {
+                                    bgcolor: 'rgba(255,255,255,0.05)',
                                 },
                             }}
                         >
-                            <ListItemIcon>
-                                <PersonIcon color={isActiveRoute('/customer/profile') ? 'primary' : 'inherit'} />
+                            <ListItemIcon sx={{ color: '#fff' }}>
+                                <PersonIcon color={isActiveRoute('/customer/profile') ? 'secondary' : 'inherit'} />
                             </ListItemIcon>
                             <ListItemText primary="My Profile" />
                         </ListItemButton>
@@ -145,8 +160,8 @@ const MobileMenu = ({ open, onClose }) => {
                 )}
 
                 {token && role === 'seller' && (
-                    <ListItemButton onClick={() => handleNavigate('/seller/dashboard')}>
-                        <ListItemIcon>
+                    <ListItemButton onClick={() => handleNavigate('/seller/dashboard')} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                        <ListItemIcon sx={{ color: '#fff' }}>
                             <StorefrontIcon />
                         </ListItemIcon>
                         <ListItemText primary="Dashboard" />
@@ -154,8 +169,8 @@ const MobileMenu = ({ open, onClose }) => {
                 )}
 
                 {token && role === 'admin' && (
-                    <ListItemButton onClick={() => handleNavigate('/admin/dashboard')}>
-                        <ListItemIcon>
+                    <ListItemButton onClick={() => handleNavigate('/admin/dashboard')} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                        <ListItemIcon sx={{ color: '#fff' }}>
                             <AdminPanelSettingsIcon />
                         </ListItemIcon>
                         <ListItemText primary="Dashboard" />
@@ -164,18 +179,15 @@ const MobileMenu = ({ open, onClose }) => {
 
                 {!token && (
                     <>
-                        <Divider sx={{ my: 1 }} />
-                        <ListItemButton component={Link} to="/login" onClick={onClose}>
-                            <ListItemText primary="Customer Login" />
+                        <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
+                        <ListItemButton component={Link} to="/admin/login" onClick={onClose} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                            <ListItemText primary="Admin" />
                         </ListItemButton>
-                        <ListItemButton component={Link} to="/register" onClick={onClose}>
-                            <ListItemText primary="Register" />
+                        <ListItemButton component={Link} to="/customer/login" onClick={onClose} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                            <ListItemText primary="Customer" />
                         </ListItemButton>
-                        <ListItemButton component={Link} to="/seller/login" onClick={onClose}>
-                            <ListItemText primary="Seller Login" />
-                        </ListItemButton>
-                        <ListItemButton component={Link} to="/admin/login" onClick={onClose}>
-                            <ListItemText primary="Admin Portal" />
+                        <ListItemButton component={Link} to="/seller/login" onClick={onClose} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }}>
+                            <ListItemText primary="Seller" />
                         </ListItemButton>
                     </>
                 )}

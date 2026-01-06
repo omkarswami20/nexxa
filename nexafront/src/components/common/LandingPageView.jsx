@@ -26,32 +26,94 @@ import ProductBrowsingContainer from '../../containers/customer/ProductBrowsingC
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
 
+const RoleCard = ({ title, description, icon: Icon, to, gradient, delay, buttonColor }) => (
+    <Grid item xs={12} md={4}>
+        <MotionPaper
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay }}
+            whileHover={{ 
+                scale: 1.03,
+                y: -5,
+                boxShadow: `0 20px 40px -10px ${buttonColor}40` // Soft glow matching brand color
+            }}
+            sx={cardStyle}
+        >
+            <MotionBox 
+                sx={iconWrapperStyle(gradient)}
+                whileHover={{ rotate: 5, scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+            >
+                <Icon sx={{ fontSize: 40, color: '#fff' }} />
+            </MotionBox>
+
+            <Typography variant="h5" fontWeight={700} sx={{ color: '#fff', mb: 2 }}>
+                {title}
+            </Typography>
+
+            <Typography sx={descStyle}>
+                {description}
+            </Typography>
+
+            <Button
+                component={Link}
+                to={to}
+                variant="contained"
+                fullWidth
+                sx={actionBtnStyle(buttonColor)}
+            >
+                {title === 'Admin Portal' ? 'Access Dashboard' : `Login as ${title.replace(' Zone', '')}`}
+            </Button>
+        </MotionPaper>
+    </Grid>
+);
+
 const LandingPageView = () => {
     const token = useSelector(selectCurrentToken);
     return (
-        <Box sx={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+        <Box sx={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', bgcolor: '#0f172a' }}>
             {/* Animated Background Gradient */}
-            {!token && (
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
-                        backgroundSize: '400% 400%',
-                        animation: 'gradientShift 15s ease infinite',
-                        opacity: 0.05,
-                        zIndex: 0,
-                        '@keyframes gradientShift': {
-                            '0%': { backgroundPosition: '0% 50%' },
-                            '50%': { backgroundPosition: '100% 50%' },
-                            '100%': { backgroundPosition: '0% 50%' },
-                        },
-                    }}
-                />
-            )}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%)',
+                    zIndex: 0,
+                }}
+            />
+            
+            {/* Decorative Blobs */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '-10%',
+                    left: '-10%',
+                    width: '40%',
+                    height: '40%',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #db2777 0%, #7c3aed 100%)',
+                    filter: 'blur(100px)',
+                    opacity: 0.2,
+                    zIndex: 0,
+                }}
+            />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: '-10%',
+                    right: '-10%',
+                    width: '40%',
+                    height: '40%',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)',
+                    filter: 'blur(100px)',
+                    opacity: 0.2,
+                    zIndex: 0,
+                }}
+            />
 
             {/* Product Browsing Section - Only show when LOGGED IN */}
             {token && (
@@ -62,231 +124,74 @@ const LandingPageView = () => {
 
             {/* Seller / Customer / Admin Section - Only show when NOT logged in */}
             {!token && (
-                <Box sx={{ py: { xs: 6, md: 12 }, position: 'relative', zIndex: 1 }}>
-                    <Container maxWidth="lg">
-                        {/* Hero Section */}
-                        <MotionBox
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            sx={{ textAlign: 'center', mb: 10 }}
-                        >
+                <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1, py: 8 }}>
+                    <Container maxWidth="xl">
+                        <Box sx={{ mb: 8, textAlign: 'center' }}>
                             <Typography
-                                variant="h2"
+                                variant="h3"
                                 fontWeight={800}
                                 gutterBottom
                                 sx={{
-                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: 'linear-gradient(to right, #fff, #94a3b8)',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
                                     mb: 2,
                                 }}
                             >
-                                Welcome to NexaShop
+                                Choose Your Path
                             </Typography>
-                            <Typography
-                                variant="h5"
-                                color="text.secondary"
-                                sx={{ mb: 4, maxWidth: 600, mx: 'auto', fontWeight: 400 }}
-                            >
-                                Your one-stop marketplace for buying and selling. Join thousands of sellers and customers.
+                            <Typography variant="h6" sx={{ color: '#94a3b8', maxWidth: 600, mx: 'auto', fontWeight: 400, letterSpacing: '0.01em' }}>
+                                One platform. Three roles. Fully connected ecosystem.
                             </Typography>
-
-                            {/* Trust Badges */}
-                            <Stack
-                                direction={{ xs: 'column', sm: 'row' }}
-                                spacing={2}
-                                justifyContent="center"
-                                sx={{ mb: 6 }}
-                            >
-                                <Chip
-                                    icon={<SecurityIcon />}
-                                    label="Secure Platform"
-                                    sx={{ bgcolor: 'success.light', color: 'success.dark', fontWeight: 600 }}
-                                />
-                                <Chip
-                                    icon={<LocalShippingIcon />}
-                                    label="Fast Delivery"
-                                    sx={{ bgcolor: 'info.light', color: 'info.dark', fontWeight: 600 }}
-                                />
-                                <Chip
-                                    icon={<ShoppingBagIcon />}
-                                    label="1000+ Products"
-                                    sx={{ bgcolor: 'primary.light', color: 'primary.dark', fontWeight: 600 }}
-                                />
-                            </Stack>
-                        </MotionBox>
-
-                        {/* Role Selection Cards */}
-                        <Box sx={{ mb: 8 }}>
-                            <Typography
-                                variant="h4"
-                                fontWeight={700}
-                                align="center"
-                                gutterBottom
-                                sx={{ mb: 1 }}
-                            >
-                                Join Our Ecosystem
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 6 }}>
-                                Choose your role and get started today
-                            </Typography>
-
-                            <Grid container spacing={4} justifyContent="center">
-                                {/* Seller Card */}
-                                <Grid item xs={12} md={4}>
-                                    <MotionPaper
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.1 }}
-                                        whileHover={{ y: -8 }}
-                                        elevation={0}
-                                        sx={cardStyle('primary')}
-                                    >
-                                        <MotionBox
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ duration: 0.5, delay: 0.3 }}
-                                            sx={iconStyle('#2563eb', '#eff6ff', '#dbeafe')}
-                                        >
-                                            <StorefrontIcon sx={{ fontSize: 48 }} />
-                                        </MotionBox>
-
-                                        <Typography variant="h4" fontWeight={700} gutterBottom>
-                                            Sell with Us
-                                        </Typography>
-
-                                        <Typography sx={descStyle}>
-                                            Scale your business with powerful tools to manage products,
-                                            orders, and growth.
-                                        </Typography>
-
-                                        <Box sx={{ width: '100%', mt: 'auto' }}>
-                                            <Button
-                                                component={Link}
-                                                to="/seller/login"
-                                                variant="contained"
-                                                fullWidth
-                                                size="large"
-                                                sx={primaryBtn}
-                                            >
-                                                Seller Login
-                                            </Button>
-
-                                            <Button
-                                                component={Link}
-                                                to="/seller/register"
-                                                variant="text"
-                                                fullWidth
-                                                sx={textBtn}
-                                            >
-                                                Create Seller Account
-                                            </Button>
-                                        </Box>
-                                    </MotionPaper>
-                                </Grid>
-
-                                {/* Customer Card */}
-                                <Grid item xs={12} md={4}>
-                                    <MotionPaper
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.2 }}
-                                        whileHover={{ y: -8 }}
-                                        elevation={0}
-                                        sx={cardStyle('info')}
-                                    >
-                                        <MotionBox
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ duration: 0.5, delay: 0.4 }}
-                                            sx={iconStyle('#0284c7', '#e0f2fe', '#bae6fd')}
-                                        >
-                                            <PersonIcon sx={{ fontSize: 48 }} />
-                                        </MotionBox>
-
-                                        <Typography variant="h4" fontWeight={700} gutterBottom>
-                                            Shop as Customer
-                                        </Typography>
-
-                                        <Typography sx={descStyle}>
-                                            Browse products, add to cart, place orders, and track deliveries
-                                            easily.
-                                        </Typography>
-
-                                        <Box sx={{ width: '100%', mt: 'auto' }}>
-                                            <Button
-                                                component={Link}
-                                                to="/login"
-                                                variant="contained"
-                                                color="info"
-                                                fullWidth
-                                                size="large"
-                                                sx={primaryBtn}
-                                            >
-                                                Customer Login
-                                            </Button>
-
-                                            <Button
-                                                component={Link}
-                                                to="/register"
-                                                variant="text"
-                                                fullWidth
-                                                sx={textBtn}
-                                            >
-                                                Create Customer Account
-                                            </Button>
-                                        </Box>
-                                    </MotionPaper>
-                                </Grid>
-
-                                {/* Admin Card */}
-                                <Grid item xs={12} md={4}>
-                                    <MotionPaper
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.3 }}
-                                        whileHover={{ y: -8 }}
-                                        elevation={0}
-                                        sx={cardStyle('secondary')}
-                                    >
-                                        <MotionBox
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ duration: 0.5, delay: 0.5 }}
-                                            sx={iconStyle('#db2777', '#fdf2f8', '#fce7f3')}
-                                        >
-                                            <AdminPanelSettingsIcon sx={{ fontSize: 48 }} />
-                                        </MotionBox>
-
-                                        <Typography variant="h4" fontWeight={700} gutterBottom>
-                                            Admin Portal
-                                        </Typography>
-
-                                        <Typography sx={descStyle}>
-                                            Manage sellers, monitor platform activity, and control system
-                                            operations.
-                                        </Typography>
-
-                                        <Box sx={{ width: '100%', mt: 'auto' }}>
-                                            <Button
-                                                component={Link}
-                                                to="/admin/login"
-                                                variant="contained"
-                                                color="secondary"
-                                                fullWidth
-                                                size="large"
-                                                sx={primaryBtn}
-                                            >
-                                                Access Dashboard
-                                            </Button>
-                                        </Box>
-                                    </MotionPaper>
-                                </Grid>
-                            </Grid>
                         </Box>
+
+                        <Grid container spacing={4} justifyContent="center" alignItems="stretch">
+                            <RoleCard 
+                                title="Admin Portal"
+                                description="System control and platform monitoring."
+                                icon={AdminPanelSettingsIcon}
+                                to="/admin/login"
+                                gradient="linear-gradient(135deg, #ec4899 0%, #db2777 100%)"
+                                buttonColor="#db2777"
+                                delay={0.1}
+                            />
+                            <RoleCard 
+                                title="Customer"
+                                description="Shop, track orders, and manage profile."
+                                icon={PersonIcon}
+                                to="/login"
+                                gradient="linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)"
+                                buttonColor="#0284c7"
+                                delay={0.2}
+                            />
+                            <RoleCard 
+                                title="Seller Zone"
+                                description="Manage products, orders, and earnings."
+                                icon={StorefrontIcon}
+                                to="/seller/login"
+                                gradient="linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)"
+                                buttonColor="#4f46e5"
+                                delay={0.3}
+                            />
+                        </Grid>
+
+                        {/* Trust Strip */}
+                        <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center', gap: { xs: 2, md: 6 }, flexWrap: 'wrap', opacity: 0.7 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#94a3b8' }}>
+                                <Typography variant="body2">🔒 Secure Platform</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#94a3b8' }}>
+                                <Typography variant="body2">⚡ Fast Performance</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#94a3b8' }}>
+                                <Typography variant="body2">🏆 Trusted Marketplace</Typography>
+                            </Box>
+                        </Box>
+
+                        {/* UX Guidance */}
+                        <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 4, color: '#64748b' }}>
+                            Tip: You can also switch roles using the top navigation.
+                        </Typography>
                     </Container>
                 </Box>
             )}
@@ -298,76 +203,51 @@ const LandingPageView = () => {
 /* Reusable Styles */
 /* ===================== */
 
-const cardStyle = (color) => ({
-    p: { xs: 4, md: 6 },
+const cardStyle = {
+    p: 4,
     height: '100%',
     borderRadius: 4,
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(20px)',
-    border: '2px solid',
-    borderColor: 'rgba(226,232,240,0.5)',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    cursor: 'pointer',
-    '&:hover': {
-        boxShadow: '0 24px 48px rgba(0,0,0,0.12)',
-        borderColor: `${color}.main`,
-        background: 'rgba(255,255,255,1)',
-    },
+    background: 'rgba(255, 255, 255, 0.03)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '4px',
-        background: `linear-gradient(90deg, ${color === 'primary' ? '#2563eb' : color === 'info' ? '#0284c7' : '#db2777'} 0%, transparent 100%)`,
-        opacity: 0,
-        transition: 'opacity 0.3s ease',
-    },
-    '&:hover::before': {
-        opacity: 1,
-    },
-});
+    // transition: 'all 0.3s ease', // Removed to let Framer Motion handle it
+};
 
-const iconStyle = (color, from, to) => ({
-    mb: 4,
-    p: 3,
-    borderRadius: '50%',
-    color,
-    background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-    boxShadow: `0 8px 16px rgba(${color === '#2563eb' ? '37, 99, 235' : color === '#0284c7' ? '2, 132, 199' : '219, 39, 119'}, 0.2)`,
-    transition: 'all 0.3s ease',
+const iconWrapperStyle = (gradient) => ({
+    mb: 3,
+    p: 2,
+    borderRadius: '20px',
+    background: gradient,
+    boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
 });
 
 const descStyle = {
-    mb: 5,
-    maxWidth: 320,
-    lineHeight: 1.7,
-    color: 'text.secondary'
+    mb: 4,
+    color: '#94a3b8',
+    lineHeight: 1.6,
+    flexGrow: 1,
 };
 
-const primaryBtn = {
-    mb: 2,
+const actionBtnStyle = (color) => ({
     py: 1.5,
-    borderRadius: 2,
+    bgcolor: color,
     fontWeight: 600,
     textTransform: 'none',
-    transition: 'all 0.2s ease',
+    fontSize: '1rem',
+    borderRadius: 2,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
     '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+        bgcolor: color,
+        filter: 'brightness(1.1)',
+        boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
     },
-};
-
-const textBtn = {
-    textTransform: 'none',
-    fontWeight: 500
-};
+});
 
 export default memo(LandingPageView);
