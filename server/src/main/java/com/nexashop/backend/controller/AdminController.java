@@ -1,10 +1,7 @@
 package com.nexashop.backend.controller;
 
-import com.nexashop.backend.dto.AdminLoginRequest;
-import com.nexashop.backend.dto.LoginResponse;
 import com.nexashop.backend.dto.UpdateSellerStatusRequest;
 import com.nexashop.backend.entity.Seller;
-import com.nexashop.backend.service.AdminAuthService;
 import com.nexashop.backend.service.SellerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,19 +13,13 @@ import java.util.List;
 @RequestMapping({ "/api/v1/admin", "/api/admin" })
 public class AdminController {
 
-    private final AdminAuthService adminAuthService;
     private final SellerService sellerService;
-
-    public AdminController(AdminAuthService adminAuthService, SellerService sellerService) {
-        this.adminAuthService = adminAuthService;
+    
+    public AdminController(SellerService sellerService) {
         this.sellerService = sellerService;
     }
 
-    // -------- LOGIN ONLY OPEN ENDPOINT -------- //
-    @PostMapping("/api/v1/auth/login/admin")
-    public ResponseEntity<LoginResponse> loginAdmin(@RequestBody AdminLoginRequest request) {
-        return ResponseEntity.ok(adminAuthService.login(request));
-    }
+
 
     // ------------ PROTECTED ENDPOINTS ------------ //
 

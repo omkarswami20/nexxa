@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import com.nexashop.backend.service.AdminAuthService;
+import com.nexashop.backend.dto.AdminLoginRequest;
+
 @RestController
 @RequestMapping({ "/api/v1/auth", "/api/auth" })
 public class AuthController {
@@ -18,17 +21,20 @@ public class AuthController {
     private final com.nexashop.backend.repository.SellerRepository sellerRepository;
     private final com.nexashop.backend.service.SellerService sellerService;
     private final com.nexashop.backend.service.CustomerService customerService;
+    private final AdminAuthService adminAuthService;
 
     public AuthController(com.nexashop.backend.service.RefreshTokenService refreshTokenService,
             com.nexashop.backend.security.JwtUtils jwtUtils,
             com.nexashop.backend.repository.SellerRepository sellerRepository,
             com.nexashop.backend.service.SellerService sellerService,
-            com.nexashop.backend.service.CustomerService customerService) {
+            com.nexashop.backend.service.CustomerService customerService,
+            AdminAuthService adminAuthService) {
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
         this.sellerRepository = sellerRepository;
         this.sellerService = sellerService;
         this.customerService = customerService;
+        this.adminAuthService = adminAuthService;
     }
 
     @Operation(summary = "Register a new Seller", description = "Creates a new seller account with PENDING_APPROVAL status and sends a verification email.")
@@ -61,6 +67,12 @@ public class AuthController {
     public ResponseEntity<com.nexashop.backend.dto.LoginResponse> loginCustomer(
             @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.CustomerLoginRequest req) {
         return ResponseEntity.ok(customerService.login(req));
+    }
+
+    @Operation(summary = "Login admin")
+    @PostMapping("/login/admin")
+    public ResponseEntity<com.nexashop.backend.dto.LoginResponse> loginAdmin(@org.springframework.web.bind.annotation.RequestBody AdminLoginRequest request) {
+        return ResponseEntity.ok(adminAuthService.login(request));
     }
 
     @Operation(summary = "Refresh Access Token")
