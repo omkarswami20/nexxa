@@ -38,6 +38,8 @@ const CheckoutView = ({
   error,
   validationError,
   totalAmount,
+  zipCodeLoading = false,
+  onZipCodeBlur,
 }) => {
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -319,10 +321,18 @@ const CheckoutView = ({
                       name="zip"
                       value={newAddress.zip}
                       onChange={(e) => handleFieldChange("zip", e.target.value)}
-                      onBlur={(e) => validateField("zip", e.target.value)}
+                      onBlur={(e) => {
+                        validateField("zip", e.target.value);
+                        if (onZipCodeBlur) {
+                          onZipCodeBlur(e.target.value);
+                        }
+                      }}
                       error={!!fieldErrors.zip}
                       helperText={fieldErrors.zip}
                       required
+                      InputProps={{
+                        endAdornment: zipCodeLoading ? <CircularProgress size={20} /> : null
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12}>

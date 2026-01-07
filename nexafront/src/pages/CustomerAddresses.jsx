@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, Divider, Button, Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, IconButton } from '@mui/material';
-import { useGetAddressesQuery, useCreateAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from '../store/api/api.apislice';
+import { Box, Typography, List, ListItem, ListItemText, Divider, Button, Dialog, DialogTitle, DialogContent, DialogActions, Grid, TextField, IconButton, CircularProgress } from '@mui/material';
+import { useGetAddressesQuery, useCreateAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation, useGetZipCodeInfoQuery } from '../store/api/api.apislice';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -14,12 +14,39 @@ const CustomerAddresses = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyAddress);
+  const [zipCodeLookup, setZipCodeLookup] = useState({ zip: '', country: '' });
 
-  const handleOpenCreate = () => { setEditing(null); setForm(emptyAddress); setOpen(true); };
-  const handleOpenEdit = (addr) => { setEditing(addr); setForm({ ...addr }); setOpen(true); };
-  const handleClose = () => setOpen(false);
+  const { data: zipCodeData, isLoading: zipCodeLoading } = useGetZipCodeInfoQuery(
+    { zip: zipCodeLookup.zip, country: zipCodeLookup.country },
+    { skip: !zipCodeLookup.zip || zipCodeLookup.zip.length < 5 }
+  );
 
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    if (zipCodeData && zipCodeLookup.zip) {
+      setForm(prev => ({
+        ...prev,
+        city: zipCodeData.city || prev.city,
+        state: zipCodeData.state || prev.state,
+        country: zipCodeData.country || prev.country,
+      }));
+    }
+  }, [zipCodeData, zipCodeLookup.zip]);
+
+  const handleOpenCreate = () => { setEditing(null); setForm(emptyAddress); setZipCodeLookup({ zip: '', country: '' }); setOpen(true); };
+  const handleOpenEdit = (addr) => { setEditing(addr); setForm({ ...addr }); setZipCodeLookup({ zip: '', country: '' }); setOpen(true); };
+  const handleClose = () => { setOpen(false); setZipCodeLookup({ zip: '', country: '' }); };
+
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleZipCodeBlur = (e) => {
+    const zip = e.target.value?.trim();
+    if (zip && zip.length >= 5) {
+      setZipCodeLookup({ zip, country: form.country || 'IN' });
+    }
+  };
 
   const save = async () => {
     if (editing && editing.id) {
@@ -67,11 +94,34 @@ const CustomerAddresses = () => {
         <DialogTitle>{editing ? 'Edit Address' : 'New Address'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {['name','phone','line1','line2','city','state','zip','country'].map((f) => (
+            {['name','phone','line1','line2'].map((f) => (
               <Grid item xs={12} sm={f==='line2' ? 12 : 6} key={f}>
                 <TextField fullWidth size="small" label={f.toUpperCase()} name={f} value={form[f] || ''} onChange={onChange} />
               </Grid>
             ))}
+            <Grid item xs={12} sm={6}>
+              <TextField 
+                fullWidth 
+                size="small" 
+                label="ZIP" 
+                name="zip" 
+                value={form.zip || ''} 
+                onChange={onChange}
+                onBlur={handleZipCodeBlur}
+                InputProps={{
+                  endAdornment: zipCodeLoading ? <CircularProgress size={20} /> : null
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="CITY" name="city" value={form.city || ''} onChange={onChange} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="STATE" name="state" value={form.state || ''} onChange={onChange} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="COUNTRY" name="country" value={form.country || ''} onChange={onChange} />
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>

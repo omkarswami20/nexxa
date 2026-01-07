@@ -137,6 +137,18 @@ export const api = createApi({
             invalidatesTags: ['Address'],
         }),
 
+        // Zip Code Lookup
+        getZipCodeInfo: builder.query({
+            query: ({ zip, country }) => {
+                const params = new URLSearchParams();
+                params.append('zip', zip);
+                if (country) {
+                    params.append('country', country);
+                }
+                return `/zipcode?${params.toString()}`;
+            },
+        }),
+
         // Admin Endpoints
         loginAdmin: builder.mutation({
             query: (credentials) => ({
@@ -515,6 +527,7 @@ export const {
     useCreateAddressMutation,
     useUpdateAddressMutation,
     useDeleteAddressMutation,
+    useGetZipCodeInfoQuery,
     useLoginAdminMutation,
     useLogoutUserMutation,
     useGetPendingSellersQuery,

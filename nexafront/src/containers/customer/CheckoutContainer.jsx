@@ -3,6 +3,7 @@ import {
   useGetCartQuery,
   useCheckoutMutation,
   useGetAddressesQuery,
+  useGetZipCodeInfoQuery,
 } from "../../store/api/api.apislice";
 import CheckoutView from "../../components/customer/CheckoutView";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +38,30 @@ const CheckoutContainer = () => {
     zip: "",
     country: "",
   });
+
+  const [zipCodeLookup, setZipCodeLookup] = useState({ zip: '', country: '' });
+
+  const { data: zipCodeData, isLoading: zipCodeLoading } = useGetZipCodeInfoQuery(
+    { zip: zipCodeLookup.zip, country: zipCodeLookup.country },
+    { skip: !zipCodeLookup.zip || zipCodeLookup.zip.length < 5 }
+  );
+
+  useEffect(() => {
+    if (zipCodeData && zipCodeLookup.zip) {
+      setNewAddress(prev => ({
+        ...prev,
+        city: zipCodeData.city || prev.city,
+        state: zipCodeData.state || prev.state,
+        country: zipCodeData.country || prev.country,
+      }));
+    }
+  }, [zipCodeData, zipCodeLookup.zip]);
+
+  const handleZipCodeBlur = (zip) => {
+    if (zip && zip.trim().length >= 5) {
+      setZipCodeLookup({ zip: zip.trim(), country: newAddress.country || 'IN' });
+    }
+  };
 
   const handleAddressSelectionChange = (value) => {
     setValidationError(null);
@@ -135,6 +160,8 @@ const CheckoutContainer = () => {
       error={error}
       validationError={validationError}
       totalAmount={totalAmount}
+      zipCodeLoading={zipCodeLoading}
+      onZipCodeBlur={handleZipCodeBlur}
     />
   );
 };

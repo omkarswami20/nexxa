@@ -76,6 +76,8 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll() // Allow
                                                                                                                        // categories
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/zipcode/**").permitAll() // Zip code lookup
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/zipcode/**").permitAll() // Zip code lookup
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
