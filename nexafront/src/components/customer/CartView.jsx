@@ -13,6 +13,7 @@ import {
   Alert,
   Paper,
   Skeleton,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -53,7 +54,11 @@ const CartView = ({
                       <Skeleton variant="text" width="40%" height={24} />
                     </Grid>
                     <Grid item xs={12} sm={3}>
-                      <Skeleton variant="rectangular" width="100%" height={40} />
+                      <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height={40}
+                      />
                     </Grid>
                   </Grid>
                 </CardContent>
@@ -63,8 +68,18 @@ const CartView = ({
           <Grid item xs={12} md={4}>
             <Paper sx={{ p: 3 }}>
               <Skeleton variant="text" width="60%" height={32} />
-              <Skeleton variant="text" width="100%" height={24} sx={{ mt: 2 }} />
-              <Skeleton variant="rectangular" width="100%" height={48} sx={{ mt: 2 }} />
+              <Skeleton
+                variant="text"
+                width="100%"
+                height={24}
+                sx={{ mt: 2 }}
+              />
+              <Skeleton
+                variant="rectangular"
+                width="100%"
+                height={48}
+                sx={{ mt: 2 }}
+              />
             </Paper>
           </Grid>
         </Grid>
@@ -110,69 +125,103 @@ const CartView = ({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, overflow: "visible" }} // Allow overlaps if needed, though we fit content
                   >
-                  <CardContent>
-                    <Grid container spacing={2} alignItems="center">
-                      {/* Product Image */}
-                      <Grid item xs={12} sm={3}>
-                        <CardMedia
-                          component="img"
-                          height="120"
-                          image={
-                            product?.imageUrl
-                              ? product.imageUrl.startsWith("http")
-                                ? product.imageUrl
-                                : `http://localhost:8080/uploads/products/${product.imageUrl}`
-                              : "Image"
-                          }
-                          alt={product?.name || "Product"}
-                          sx={{ objectFit: "cover", borderRadius: 1 }}
-                        />
-                      </Grid>
-
-                      {/* Product Details */}
-                      <Grid item xs={12} sm={6}>
-                        <Typography
-                          variant="h6"
-                          component={Link}
-                          to={`/products/${item?.productId}`}
+                    <CardContent sx={{ "&:last-child": { pb: 2 } }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
+                          alignItems: { xs: "flex-start", sm: "center" },
+                          gap: 3,
+                        }}
+                      >
+                        {/* Product Image */}
+                        <Box
                           sx={{
-                            textDecoration: "none",
-                            color: "inherit",
-                            "&:hover": { color: "primary.main" },
+                            width: { xs: "100%", sm: 120 },
+                            height: 120,
+                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "background.default",
+                            borderRadius: 1,
+                            overflow: "hidden",
+                            border: "1px solid",
+                            borderColor: "divider",
                           }}
                         >
-                          {product?.name || `Product #${item?.productId}`}
-                        </Typography>
-                        {product?.category && (
-                          <Typography variant="caption" color="text.secondary">
-                            {product.category.name}
-                          </Typography>
-                        )}
-                        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                          Rs. {(product?.price || 0).toFixed(2)}
-                        </Typography>
-                        {product &&
-                          (product.stockQuantity || 0) <
-                            (item.quantity || 0) && (
-                            <Alert severity="warning" sx={{ mt: 1 }}>
-                              Only {product.stockQuantity} available in stock
-                            </Alert>
-                          )}
-                      </Grid>
+                          <CardMedia
+                            component="img"
+                            image={
+                              product?.imageUrl
+                                ? product.imageUrl.startsWith("http")
+                                  ? product.imageUrl
+                                  : `http://localhost:8080/uploads/products/${product.imageUrl}`
+                                : "Image"
+                            }
+                            alt={product?.name || "Product"}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </Box>
 
-                      {/* Quantity Controls */}
-                      <Grid item xs={12} sm={3}>
+                        {/* Product Details */}
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            component={Link}
+                            to={`/products/${item?.productId}`}
+                            sx={{
+                              textDecoration: "none",
+                              color: "inherit",
+                              fontWeight: 600,
+                              display: "block",
+                              "&:hover": { color: "primary.main" },
+                            }}
+                          >
+                            {product?.name || `Product #${item?.productId}`}
+                          </Typography>
+
+                          {product?.category && (
+                            <Chip
+                              label={product.category.name}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mt: 1, height: 24 }}
+                            />
+                          )}
+
+                          {product &&
+                            (product.stockQuantity || 0) <
+                              (item.quantity || 0) && (
+                              <Alert severity="warning" sx={{ mt: 1, py: 0 }}>
+                                Only {product.stockQuantity} available
+                              </Alert>
+                            )}
+                        </Box>
+
+                        {/* Controls & Price - Stacked on Mobile, Row on Desktop */}
                         <Box
                           sx={{
                             display: "flex",
+                            flexDirection: {
+                              xs: "row",
+                              sm: "column",
+                              md: "row",
+                            },
                             alignItems: "center",
                             justifyContent: "space-between",
-                            flexDirection: { xs: "row", sm: "column" },
-                            gap: 1,
+                            width: { xs: "100%", sm: "auto" },
+                            gap: { xs: 2, sm: 2, md: 4 },
+                            mt: { xs: 2, sm: 0 },
                           }}
                         >
+                          {/* Quantity */}
                           <Paper
                             elevation={0}
                             sx={{
@@ -191,16 +240,13 @@ const CartView = ({
                                 onDecrease(item.productId, item.quantity)
                               }
                               disabled={(item.quantity || 0) <= 1}
-                              sx={{
-                                transition: "all 0.2s ease",
-                                "&:hover": { transform: "scale(1.1)" },
-                              }}
                             >
-                              <RemoveIcon />
+                              <RemoveIcon fontSize="small" />
                             </IconButton>
                             <Typography
-                              variant="body1"
-                              sx={{ minWidth: 30, textAlign: "center", fontWeight: 600 }}
+                              variant="body2"
+                              fontWeight={600}
+                              sx={{ minWidth: 24, textAlign: "center" }}
                             >
                               {item.quantity || 0}
                             </Typography>
@@ -214,40 +260,50 @@ const CartView = ({
                                 (item.quantity || 0) >=
                                   (product.stockQuantity || 0)
                               }
-                              sx={{
-                                transition: "all 0.2s ease",
-                                "&:hover": { transform: "scale(1.1)" },
-                              }}
                             >
-                              <AddIcon />
+                              <AddIcon fontSize="small" />
                             </IconButton>
                           </Paper>
+
+                          {/* Price */}
+                          <Box sx={{ textAlign: "right", minWidth: 80 }}>
+                            <Typography
+                              variant="h6"
+                              color="primary"
+                              fontWeight={700}
+                            >
+                              Rs.{" "}
+                              {(
+                                (product?.price || 0) * (item.quantity || 0)
+                              ).toFixed(2)}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              display="block"
+                            >
+                              {item.quantity} x Rs.{" "}
+                              {(product?.price || 0).toFixed(0)}
+                            </Typography>
+                          </Box>
+
+                          {/* Remove */}
                           <IconButton
                             color="error"
                             onClick={() => onRemove(item.productId)}
                             size="small"
                             sx={{
-                              transition: "all 0.2s ease",
-                              "&:hover": { transform: "scale(1.1)" },
+                              border: "1px solid",
+                              borderColor: "divider",
+                              ml: { xs: 0, md: 1 },
                             }}
                           >
                             <DeleteIcon />
                           </IconButton>
                         </Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mt: 1, textAlign: "center", fontWeight: 600 }}
-                        >
-                          Subtotal: Rs.{" "}
-                          {(
-                            (product?.price || 0) * (item.quantity || 0)
-                          ).toFixed(2)}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </MotionCard>
+                      </Box>
+                    </CardContent>
+                  </MotionCard>
                 );
               })}
             </AnimatePresence>
@@ -279,7 +335,10 @@ const CartView = ({
                   Rs. {totalAmount.toFixed(2)}
                 </Typography>
               </Box>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <Button
                   variant="contained"
                   fullWidth

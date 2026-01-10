@@ -22,6 +22,20 @@ public class DataInitializer {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Default admin creation logic removed as per requirements.
-    // Admin users must be manually inserted into the database.
+    @Bean
+    public CommandLineRunner initData() {
+        return args -> {
+            Admin admin = adminRepository.findByEmail("admin@nexashop.com").orElse(null);
+            
+            if (admin == null) {
+                admin = new Admin();
+                admin.setEmail("admin@nexashop.com");
+                admin.setPassword(passwordEncoder.encode("admin123"));
+                adminRepository.save(admin);
+                logger.info("Default admin user created successfully");
+            } else {
+                logger.debug("Admin user already exists in database");
+            }
+        };
+    }
 }
