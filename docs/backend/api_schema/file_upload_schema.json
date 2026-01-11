@@ -1,0 +1,77 @@
+{
+    "controller": "FileUploadController",
+    "basePath": "/api/upload",
+    "endpoints": [
+        {
+            "method": "POST",
+            "path": "/product-image",
+            "summary": "Upload Product Image",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "multipart/form-data": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "file": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Uploaded successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "http://localhost:8080/uploads/products/image.jpg",
+                                "message": "File uploaded successfully"
+                            }
+                        }
+                    }
+                },
+                "400": {
+                    "description": "File empty or too large"
+                }
+            }
+        },
+        {
+            "method": "DELETE",
+            "path": "/product-image",
+            "summary": "Delete Product Image",
+            "security": [
+                {
+                    "bearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "url",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string",
+                        "example": "http://localhost:8080/uploads/products/image.jpg"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Deleted successfully"
+                },
+                "404": {
+                    "description": "File not found"
+                }
+            }
+        }
+    ]
+}

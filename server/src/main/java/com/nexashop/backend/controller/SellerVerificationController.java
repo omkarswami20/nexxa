@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping({ "/api/v1/sellers", "/api/v1/seller", "/api/sellers", "/api/seller" })
+@RequestMapping({ "/api/v1/sellers", "/api/sellers" })
 public class SellerVerificationController {
 
     private static final Logger logger = LoggerFactory.getLogger(SellerVerificationController.class);
@@ -36,7 +36,7 @@ public class SellerVerificationController {
     }
 
     @Operation(summary = "Send seller mobile OTP (Compatible with /api/seller/send-otp)")
-    @PostMapping(value = { "/mobile/send-otp", "/send-otp" }) // Supporting both for backward compatibility and new
+    @PostMapping("/mobile/send-otp")
                                                               // requirement
     public ResponseEntity<?> sendMobileOtp(@RequestBody Map<String, String> body) {
         String mobile = body.get("mobile");

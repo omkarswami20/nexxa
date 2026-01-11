@@ -1,0 +1,227 @@
+{
+    "controller": "SellerController",
+    "basePath": "/api/sellers",
+    "endpoints": [
+        {
+            "method": "POST",
+            "path": "/register",
+            "summary": "Register Seller",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Jane Seller"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "jane@seller.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "seller123"
+                                },
+                                "storeName": {
+                                    "type": "string",
+                                    "example": "Jane's Boutique"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Registered successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": 1,
+                                "email": "jane@seller.com",
+                                "status": "PENDING_APPROVAL"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/login",
+            "summary": "Seller Login",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "jane@seller.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "seller123"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Login success",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "token": "eyJhbGciOiJIUzI1...",
+                                "refreshToken": "eyJhbGciOiJIUzI1..."
+                            }
+                        }
+                    }
+                },
+                "403": {
+                    "description": "Verification Required",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "status": 403,
+                                "error": "VERIFICATION_REQUIRED",
+                                "message": "Please complete verification to login",
+                                "emailVerified": false,
+                                "mobileVerified": false,
+                                "accountStatus": "PENDING_ADMIN_APPROVAL"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/resend-verification-email",
+            "summary": "Resend Verification Email",
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "jane@seller.com"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Email resent",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "Verification email resent"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "GET",
+            "path": "/verify",
+            "summary": "Verify Email Token",
+            "parameters": [
+                {
+                    "name": "token",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Verified",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "verified": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/mobile/send-otp",
+            "summary": "Send Mobile OTP",
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "mobile": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "message": "OTP sent"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "method": "POST",
+            "path": "/mobile/verify-otp",
+            "summary": "Verify Mobile OTP",
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "mobile": {
+                                    "type": "string"
+                                },
+                                "otp": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "valid": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
