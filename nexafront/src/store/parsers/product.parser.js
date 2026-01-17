@@ -1,19 +1,20 @@
 export const transformProductResponse = (response) => {
     // Parse and normalize product data
-    if (response) {
-        return {
-            ...response,
-            name: response?.name || 'Unknown Product',
-            description: response?.description || '',
-            imageUrl: response?.imageUrl || response?.image || '',
-            price: parseFloat(response?.price) || 0,
-            stockQuantity: parseInt(response?.stockQuantity) || 0,
-            createdAt: response?.createdAt ? new Date(response.createdAt) : null,
-            category: response?.category || (response?.categoryName ? { name: response.categoryName, id: response.categoryId } : null),
-            updatedAt: response?.updatedAt ? new Date(response.updatedAt) : null,
-        };
-    }
-    return response;
+    if (!response) return null;
+
+    return {
+        id: response?.id ?? null,
+        name: response?.name || 'Unknown Product',
+        description: response?.description || '',
+        imageUrl: response?.imageUrl || response?.image || '',
+        price: parseFloat(response?.price) || 0,
+        stockQuantity: parseInt(response?.stockQuantity) || 0,
+        categoryId: response?.categoryId ?? null,
+        categoryName: response?.categoryName || '',
+        createdAt: response?.createdAt ? new Date(response.createdAt) : null,
+        category: response?.category || (response?.categoryName ? { name: response.categoryName, id: response.categoryId } : null),
+        updatedAt: response?.updatedAt ? new Date(response.updatedAt) : null,
+    };
 };
 
 export const transformProductListResponse = (response) => {

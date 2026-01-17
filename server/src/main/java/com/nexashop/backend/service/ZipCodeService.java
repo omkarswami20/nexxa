@@ -62,6 +62,13 @@ public class ZipCodeService {
 
             return parseZippopotamResponse(response, countryCode);
 
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            if (e.getStatusCode() == org.springframework.http.HttpStatus.NOT_FOUND) {
+                logger.info("Zip code {} not found for country {}", zipCode, countryCode);
+                return null;
+            }
+            logger.error("HTTP error fetching zip code data for {}: {}", zipCode, e.getMessage());
+            throw new IllegalArgumentException("External API error: " + e.getMessage());
         } catch (RestClientException e) {
             logger.error("Failed to fetch zip code data for {}: {}", zipCode, e.getMessage());
             throw new IllegalArgumentException("Invalid zip code or unable to fetch address details");

@@ -64,10 +64,7 @@ public class SellerService {
         String token = verificationService.createToken("seller-email", savedSeller.getEmail(),
                 java.time.Duration.ofHours(24));
         String link = System.getProperty("app.frontend.url", "http://localhost:5173") + "/seller/verify?token=" + token;
-        emailService.sendSimpleEmail(savedSeller.getEmail(), "Verify your email - Nexashop",
-                "Dear " + savedSeller.getName()
-                        + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link
-                        + "\n\nBest Regards,\nNexashop Team");
+        emailService.sendSellerEmailVerification(savedSeller.getEmail(), savedSeller.getName(), link);
 
         // Trigger Mobile OTP (2 minutes TTL)
         if (savedSeller.getMobile() != null && !savedSeller.getMobile().isBlank()) {
@@ -189,9 +186,6 @@ public class SellerService {
         String token = verificationService.createToken("seller-email", seller.getEmail(),
                 java.time.Duration.ofHours(24));
         String link = System.getProperty("app.frontend.url", "http://localhost:5173") + "/seller/verify?token=" + token;
-        emailService.sendSimpleEmail(seller.getEmail(), "Verify your email - Nexashop",
-                "Dear " + seller.getName()
-                        + ",\n\nPlease verify your email by clicking the link below (valid for 24 hours):\n" + link
-                        + "\n\nBest Regards,\nNexashop Team");
+        emailService.sendSellerEmailVerification(seller.getEmail(), seller.getName(), link);
     }
 }

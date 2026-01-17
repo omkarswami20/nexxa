@@ -64,10 +64,7 @@ public class OtpService {
         String key = buildKey(type, email);
         redisTemplate.opsForValue().set(key, otp, Duration.ofSeconds(ttlSeconds));
 
-        String subject = "Nexashop OTP Verification";
-        String body = "Your OTP is: " + otp + "\n" +
-                "This code will expire in " + ttlSeconds + " seconds.";
-        emailService.sendSimpleEmail(email, subject, body);
+        emailService.sendOtpEmail(email, otp);
     }
 
     public boolean verifyOtp(String email, String otp, OtpType type) {
@@ -101,9 +98,7 @@ public class OtpService {
             sendSms(identifier, otp);
         } else if ("user-email".equals(context) || "CUSTOMER_EMAIL".equals(context) || "forgot-password".equals(context)) {
             logger.debug("Dispatching Email for: {}", identifier);
-            String subject = "Nexashop OTP";
-            String body = "Your OTP is: " + otp;
-            emailService.sendSimpleEmail(identifier, subject, body);
+            emailService.sendOtpEmail(identifier, otp);
         }
     }
 

@@ -48,6 +48,7 @@ public class AuthController {
         return ResponseEntity.ok(sellerService.registerSeller(request));
     }
 
+    @Operation(summary = "Login Seller", description = "Authenticates a seller and returns a JWT token.")
     @PostMapping("/login/seller")
     public ResponseEntity<com.nexashop.backend.dto.LoginResponse> loginSeller(
             @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.SellerLoginRequest request) {

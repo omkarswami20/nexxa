@@ -5,7 +5,7 @@ export const transformCartItem = (item) => {
     return {
         id: item?.id ?? null,
         productId: item?.productId ?? null,
-        quantity: parseInt(item?.quantity) || 0,
+        quantity: parseInt(item?.quantity || 0) || 0,
         // Safely parse nested product
         product: transformProductResponse(item?.product),
         createdAt: item?.createdAt ? new Date(item.createdAt) : null,

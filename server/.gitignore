@@ -7,4 +7,9 @@ target/
 # OS
 .DS_Store
 
+# Test
+.test
+.test.log
+
+
 

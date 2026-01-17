@@ -26,6 +26,9 @@ public class ZipCodeController {
             @RequestParam(required = false) String country) {
         try {
             ZipCodeResponse response = zipCodeService.lookupZipCode(zip, country);
+            if (response == null) {
+                return ResponseEntity.ok(null);
+            }
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

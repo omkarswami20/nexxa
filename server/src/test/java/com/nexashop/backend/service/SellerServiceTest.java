@@ -69,7 +69,7 @@ class SellerServiceTest {
 
         // Verify email resend logic was triggered (createToken and sendEmail)
         verify(verificationService).createToken(eq("seller-email"), eq(seller.getEmail()), any());
-        verify(emailService).sendSimpleEmail(eq(seller.getEmail()), anyString(), anyString());
+        verify(emailService).sendSellerEmailVerification(eq(seller.getEmail()), eq(seller.getName()), anyString());
 
         // Verify mobile OTP resend logic was triggered
         verify(otpService).sendOtpWithContext(eq(seller.getMobile()), eq("SELLER"), eq(60L));

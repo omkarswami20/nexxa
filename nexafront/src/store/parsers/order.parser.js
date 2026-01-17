@@ -1,13 +1,16 @@
 export const transformOrderItem = (item) => {
     if (!item) return null;
+    const quantity = parseInt(item?.quantity || 0) || 0;
+    const unitPrice = parseFloat(item?.unitPrice || 0) || 0;
+    
     return {
         id: item?.id ?? null,
         orderId: item?.orderId ?? null,
         productId: item?.productId ?? null,
         productNameSnapshot: item?.productNameSnapshot || 'Unknown Product',
-        quantity: parseInt(item?.quantity) || 0,
-        unitPrice: parseFloat(item?.unitPrice) || 0,
-        totalPrice: (parseInt(item?.quantity) || 0) * (parseFloat(item?.unitPrice) || 0),
+        quantity,
+        unitPrice,
+        totalPrice: quantity * unitPrice,
         status: item?.status || 'PENDING',
     };
 };
