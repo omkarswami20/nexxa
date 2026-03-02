@@ -1,0 +1,10 @@
+Keep Email Template in Database 
+
+Stage , Subject 
+
+template should be stored in database and should be editable by admin.
+This will allow for easier management of email templates and ensure that they can be updated without needing to modify the codebase. Admins can log in to the system, access the email template section, and make necessary changes to the subject and content of the email templates as needed. This approach also allows for better organization and version control of email templates.
+
+
+For Future 
+its scalable so we can change through db so we dont relay on Server side deployemnt for email template changes. This means that if there are any updates or modifications needed for the email templates, they can be done quickly and efficiently without the need for a full deployment. This is especially beneficial in situations where there may be urgent changes required, such as during a marketing campaign or when addressing customer feedback. By keeping the email templates in the database, we can ensure that they are always up-to-date and can be easily managed by the admin team.
