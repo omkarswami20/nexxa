@@ -45,39 +45,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/customers/forgot-password/**").permitAll()
                         .requestMatchers("/api/v1/sellers/verify").permitAll()
                         .requestMatchers("/api/v1/sellers/mobile/**", "/api/v1/seller/mobile/**").permitAll()
-                        // Backward compatibility - keep old paths working temporarily
-                        .requestMatchers("/api/sellers/register", "/api/sellers/login", "/api/admin/login").permitAll()
-                        .requestMatchers("/api/auth/refresh-token").permitAll()
-                        .requestMatchers("/api/otp/**").permitAll()
-                        .requestMatchers("/api/customers/register", "/api/customers/login").permitAll()
-                        .requestMatchers("/api/customers/otp/verify-email", "/api/customers/otp/verify-mobile")
-                        .permitAll()
-                        .requestMatchers("/api/customers/resend-otp").permitAll()
-                        .requestMatchers("/api/customers/forgot-password/**").permitAll()
-                        .requestMatchers("/api/sellers/verify").permitAll()
-                        .requestMatchers("/api/sellers/mobile/**").permitAll()
-                        // Authenticated endpoints (v1)
-                        .requestMatchers("/api/v1/cart/**").authenticated()
-                        .requestMatchers("/api/v1/checkout").authenticated()
-                        .requestMatchers("/api/v1/orders/**").authenticated()
-                        .requestMatchers("/api/v1/seller/orders/**").authenticated()
-                        .requestMatchers("/api/v1/products/seller", "/api/v1/products/seller/**").authenticated()
-                        // Backward compatibility for authenticated endpoints
-                        .requestMatchers("/api/cart/**").authenticated()
-                        .requestMatchers("/api/checkout").authenticated()
-                        .requestMatchers("/api/orders/**").authenticated()
-                        .requestMatchers("/api/seller/orders/**").authenticated()
-                        .requestMatchers("/api/products/seller", "/api/products/seller/**").authenticated()
+                        // Customer-only authenticated endpoints (v1)
+                        .requestMatchers("/api/v1/cart/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/v1/orders/checkout").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/v1/orders/**").hasAuthority("ROLE_CUSTOMER")
+                        // Seller-only authenticated endpoints (v1)
+                        .requestMatchers("/api/v1/products/seller", "/api/v1/products/seller/**").hasAuthority("ROLE_SELLER")
+                        .requestMatchers("/api/v1/seller/orders/**").hasAuthority("ROLE_SELLER")
                         // Public resources
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll() // Backward
-                                                                                                                  // compatibility
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll() // Allow
                                                                                                                        // categories
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/zipcode/**").permitAll() // Zip code lookup
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/zipcode/**").permitAll() // Zip code lookup
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())

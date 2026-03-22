@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.Random;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -19,7 +19,8 @@ public class OtpService {
 
     private final StringRedisTemplate redisTemplate;
     private final EmailService emailService;
-    private final Random random = new Random();
+    private final RestTemplate restTemplate;
+    private final SecureRandom random = new SecureRandom();
     
     @Value("${app.sms.enabled:true}")
     private boolean smsEnabled;
@@ -30,9 +31,10 @@ public class OtpService {
     @Value("${app.sms.api.url:https://ciacloud.in/otpapi.php}")
     private String smsApiUrl;
 
-    public OtpService(StringRedisTemplate redisTemplate, EmailService emailService) {
+    public OtpService(StringRedisTemplate redisTemplate, EmailService emailService, RestTemplate restTemplate) {
         this.redisTemplate = redisTemplate;
         this.emailService = emailService;
+        this.restTemplate = restTemplate;
     }
 
     private void sendSms(String mobile, String otp) {
@@ -49,7 +51,7 @@ public class OtpService {
             
             org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
             
-            new RestTemplate().exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+            this.restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
             logger.info("SMS sent successfully to: {}", mobile);
         } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
             logger.warn("SMS API key invalid for mobile: {}", mobile);
